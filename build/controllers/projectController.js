@@ -17,7 +17,7 @@ const cloudy_1 = __importDefault(require("../helpers/cloudy"));
 const models_1 = require("../models");
 const nanoid_1 = require("nanoid");
 const plcholder = "https://res.cloudinary.com/dlw7wjlp3/image/upload/v1686575064/placeholder-product_zhkvqu.webp";
-const plcId = 'fghksdju374gdfhg';
+const plcId = "fghksdju374gdfhg";
 const getAllProjects = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const projects = yield models_1.Project.find();
     res.status(200).json(projects);
@@ -56,7 +56,7 @@ const updateProject = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             const project = yield models_1.Project.findByIdAndUpdate(projectId, {
                 title,
                 description,
-                image: { url: plcholder, id: '' },
+                image: { url: plcholder, id: "" },
             }, { new: true });
             if (!project) {
                 return res.json("Project null");
@@ -65,7 +65,7 @@ const updateProject = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         }
         const projectOld = yield models_1.Project.findById(projectId);
         if (!projectOld) {
-            throw (0, helpers_1.errorHandler)(404, "No such a project");
+            throw (0, helpers_1.ErrorHandler)(404, "No such a project");
         }
         if (projectOld.image.id) {
             yield cloudy_1.default.uploader.destroy(projectOld.image.id);

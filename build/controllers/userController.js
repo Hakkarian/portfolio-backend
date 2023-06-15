@@ -68,28 +68,30 @@ const register = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 
 const login = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield models_1.User.findOne({ email: req.body.email });
     if (!user) {
-        return res.status(404).json({ message: 'Not Found' });
+        return res.status(404).json({ message: "Not Found" });
     }
     const { SECRET_KEY } = process.env;
     const payload = {
-        id: user === null || user === void 0 ? void 0 : user._id
+        id: user === null || user === void 0 ? void 0 : user._id,
     };
-    const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '23h' });
+    const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "23h" });
     user.token = token;
     user.save();
-    res.status(200).json({ token, user: { email: user === null || user === void 0 ? void 0 : user.email, userId: user === null || user === void 0 ? void 0 : user._id } });
+    res
+        .status(200)
+        .json({ token, user: { email: user === null || user === void 0 ? void 0 : user.email, userId: user === null || user === void 0 ? void 0 : user._id } });
 }));
 const logout = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { _id } = req.user;
     const user = yield models_1.User.findByIdAndUpdate(_id, { token: "" });
     if (!user) {
-        throw (0, helpers_1.errorHandler)(401);
+        throw (0, helpers_1.ErrorHandler)(401);
     }
     res.status(204).json({ message: "Deleted successfully" });
 }));
 const current = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { user } = req;
-    const { token, username, email, favorite, isAdmin, _id: userId } = user;
+    const { token, username, email, favorite, isAdmin, _id: userId, } = user;
     res.json({ token, user: { username, email, userId, favorite, isAdmin } });
 }));
 const google = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -100,27 +102,38 @@ const verifyEmail = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, vo
     const { verificationToken } = req.params;
     const user = yield models_1.User.findOne({ verificationToken });
     if (!user) {
-        throw (0, helpers_1.errorHandler)(404, "Email not found");
+        throw (0, helpers_1.ErrorHandler)(404, "Email not found");
     }
-    yield models_1.User.findByIdAndUpdate(user === null || user === void 0 ? void 0 : user._id, { verify: true, verificationToken: null });
-    res.status(200).json({ message: 'Verification successful' });
+    yield models_1.User.findByIdAndUpdate(user === null || user === void 0 ? void 0 : user._id, {
+        verify: true,
+        verificationToken: null,
+    });
+    res.status(200).json({ message: "Verification successful" });
 }));
 const repeatVerifyEmail = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email } = req.body;
     const baseUrl = process.env.BASE_URL;
     const user = yield models_1.User.findOne({ email });
     if (!user) {
-        throw (0, helpers_1.errorHandler)(401, 'Email not found');
+        throw (0, helpers_1.ErrorHandler)(401, "Email not found");
     }
     if (user.verify) {
-        throw (0, helpers_1.errorHandler)(400, 'Verification has already been passed');
+        throw (0, helpers_1.ErrorHandler)(400, "Verification has already been passed");
     }
     const verifyEmail = {
         to: email,
         subject: "Verify email",
-        html: `<a target="_blank" href="${baseUrl}/users/verify/${user.verificationToken}">Click me to verify email</a>`
+        html: `<a target="_blank" href="${baseUrl}/users/verify/${user.verificationToken}">Click me to verify email</a>`,
     };
     yield (0, helpers_1.sendNodeEmail)(verifyEmail);
     res.json({ message: "Email verification success" });
 }));
-exports.default = { register, login, logout, current, google, verifyEmail, repeatVerifyEmail };
+exports.default = {
+    register,
+    login,
+    logout,
+    current,
+    google,
+    verifyEmail,
+    repeatVerifyEmail,
+};

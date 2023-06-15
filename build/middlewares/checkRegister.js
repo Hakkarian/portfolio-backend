@@ -15,11 +15,11 @@ const schemas_1 = require("../schemas");
 const checkRegister = (0, helpers_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { error, value } = (0, schemas_1.registerValidation)(req.body);
     if (error) {
-        next((0, helpers_1.errorHandler)(400, error.message));
+        next((0, helpers_1.ErrorHandler)(400, error.message));
     }
     const emailExists = yield models_1.User.exists({ email: req.body.email });
     if (emailExists) {
-        next((0, helpers_1.errorHandler)(409, "Email in use"));
+        next((0, helpers_1.ErrorHandler)(409, "Email in use"));
     }
     req.body = value;
     next();

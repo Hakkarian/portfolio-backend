@@ -11,11 +11,11 @@ const errorMessages = {
     401: "Unauthorized",
     403: "Forbidden",
     404: "Not Found",
-    409: "Conflict"
+    409: "Conflict",
 };
-const errorHandler = (status, message = errorMessages[status]) => {
+const ErrorHandler = (status, message = errorMessages[status]) => {
     const error = new CustomError(status, message);
     error.status = status;
     return error;
 };
-exports.default = errorHandler;
+exports.default = ErrorHandler;

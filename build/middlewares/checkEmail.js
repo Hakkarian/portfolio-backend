@@ -15,11 +15,11 @@ const schemas_1 = require("../schemas");
 const checkEmail = (0, helpers_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { error, value } = (0, schemas_1.emailValidation)(req.body);
     if (error) {
-        throw (0, helpers_1.errorHandler)(400, error.details[0].message);
+        throw (0, helpers_1.ErrorHandler)(400, error.details[0].message);
     }
     const user = yield models_1.User.findOne({ email: value.email });
     if (!user) {
-        throw (0, helpers_1.errorHandler)(401);
+        throw (0, helpers_1.ErrorHandler)(401);
     }
     req.body = value;
     next();

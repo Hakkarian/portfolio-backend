@@ -17,26 +17,26 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const models_1 = require("../models");
 const authenticate = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    const authorization = (_a = req.headers.authorization) !== null && _a !== void 0 ? _a : '';
+    const authorization = (_a = req.headers.authorization) !== null && _a !== void 0 ? _a : "";
     const secret = process.env.SECRET_KEY;
-    const [bearer, token] = authorization.split(' ');
-    if (bearer !== 'Bearer') {
-        next((0, helpers_1.errorHandler)(401));
+    const [bearer, token] = authorization.split(" ");
+    if (bearer !== "Bearer") {
+        next((0, helpers_1.ErrorHandler)(401));
     }
     try {
         const { id } = jsonwebtoken_1.default.verify(token, secret);
         if (!id) {
-            throw (0, helpers_1.errorHandler)(401);
+            throw (0, helpers_1.ErrorHandler)(401);
         }
         const user = yield models_1.User.findById(id);
         if (!user || !user.token || user.token !== token) {
-            throw (0, helpers_1.errorHandler)(401);
+            throw (0, helpers_1.ErrorHandler)(401);
         }
         req.user = user;
         next();
     }
     catch (error) {
-        next((0, helpers_1.errorHandler)(401));
+        next((0, helpers_1.ErrorHandler)(401));
     }
 });
 exports.default = authenticate;

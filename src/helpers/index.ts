@@ -1,7 +1,15 @@
 import catchAsync from "./catchAsync";
-import errorHandler from "./errorHandler";
+import ErrorHandler from "./ErrorHandler";
 import sendNodeEmail from "./sendNodeEmail";
 import { registerLimitter, loginLimitter } from "./limitters";
 import { userAvatar } from "./userAvatar";
 
-export {catchAsync, errorHandler, sendNodeEmail, registerLimitter, loginLimitter, userAvatar};
+export {
+  catchAsync,
+  ErrorHandler,
+  sendNodeEmail,
+  registerLimitter,
+  loginLimitter,
+  userAvatar,
+};
+

@@ -15,14 +15,14 @@ const schemas_1 = require("../schemas");
 const checkLogin = (0, helpers_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { error, value } = (0, schemas_1.loginValidation)(req.body);
     if (error) {
-        throw (0, helpers_1.errorHandler)(400, error.details[0].message);
+        throw (0, helpers_1.ErrorHandler)(400, error.details[0].message);
     }
     const user = models_1.User.findOne({ email: value.email });
     if (error) {
-        next((0, helpers_1.errorHandler)(400));
+        next((0, helpers_1.ErrorHandler)(400));
     }
     if (!user) {
-        next((0, helpers_1.errorHandler)(401));
+        next((0, helpers_1.ErrorHandler)(401));
     }
     // const correctPassword = await user.checkPassword(value.password, user.password)
     req.body = value;

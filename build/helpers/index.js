@@ -3,11 +3,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.userAvatar = exports.loginLimitter = exports.registerLimitter = exports.sendNodeEmail = exports.errorHandler = exports.catchAsync = void 0;
+exports.userAvatar = exports.loginLimitter = exports.registerLimitter = exports.sendNodeEmail = exports.ErrorHandler = exports.catchAsync = void 0;
 const catchAsync_1 = __importDefault(require("./catchAsync"));
 exports.catchAsync = catchAsync_1.default;
-const errorHandler_1 = __importDefault(require("./errorHandler"));
-exports.errorHandler = errorHandler_1.default;
+const ErrorHandler_1 = __importDefault(require("./ErrorHandler"));
+exports.ErrorHandler = ErrorHandler_1.default;
 const sendNodeEmail_1 = __importDefault(require("./sendNodeEmail"));
 exports.sendNodeEmail = sendNodeEmail_1.default;
 const limitters_1 = require("./limitters");
