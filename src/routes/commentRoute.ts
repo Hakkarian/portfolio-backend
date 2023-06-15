@@ -4,7 +4,8 @@ import middlewares from "../middlewares";
 
 const router = express.Router();
 
-router.get('/:projectId/comments', middlewares.authenticate, commentCtrl.getAllComments);
+router.get('/:projectId/comments', commentCtrl.getAllComments);
+
 router.post(
   "/:projectId/comments",
   middlewares.authenticate,
