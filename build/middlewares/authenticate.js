@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const helpers_1 = require("../helpers");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const models_1 = require("../models");
-const authenticate = (0, helpers_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+const authenticate = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const authorization = (_a = req.headers.authorization) !== null && _a !== void 0 ? _a : '';
     const secret = process.env.SECRET_KEY;
@@ -25,6 +25,9 @@ const authenticate = (0, helpers_1.catchAsync)((req, res, next) => __awaiter(voi
     }
     try {
         const { id } = jsonwebtoken_1.default.verify(token, secret);
+        if (!id) {
+            throw (0, helpers_1.errorHandler)(401);
+        }
         const user = yield models_1.User.findById(id);
         if (!user || !user.token || user.token !== token) {
             throw (0, helpers_1.errorHandler)(401);
@@ -33,10 +36,7 @@ const authenticate = (0, helpers_1.catchAsync)((req, res, next) => __awaiter(voi
         next();
     }
     catch (error) {
-        next(error);
+        next((0, helpers_1.errorHandler)(401));
     }
-}));
-const authenticateHandler = (req, res, next) => {
-    return authenticate(req, res, next).catch(next);
-};
-exports.default = authenticateHandler;
+});
+exports.default = authenticate;

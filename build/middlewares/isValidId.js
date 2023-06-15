@@ -17,7 +17,6 @@ const isValidId = (req, res, next) => __awaiter(void 0, void 0, void 0, function
     if (!project) {
         throw (0, helpers_1.errorHandler)(400, "Id is invalid.");
     }
-    console.log('middlewares', project);
     next();
 });
 exports.default = isValidId;

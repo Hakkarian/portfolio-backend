@@ -15,7 +15,7 @@ type RequestHandlerWithUser<T = AuthenticatedRequest> = (
     next: NextFunction
  ) => Promise<void>;
 
-const authenticate: RequestHandlerWithUser<AuthenticatedRequest> = catchAsync(async (req, res, next) => { 
+const authenticate = async (req: Request, res: Response, next: NextFunction) => { 
     const authorization = req.headers.authorization ?? '';
     const secret = process.env.SECRET_KEY;
 
@@ -23,9 +23,11 @@ const authenticate: RequestHandlerWithUser<AuthenticatedRequest> = catchAsync(as
     if (bearer !== 'Bearer') {
         next(errorHandler(401))
     }
-    
     try {
-        const {id} = jwt.verify(token, secret as string) as JwtPayload;
+        const { id } = jwt.verify(token, secret as string) as JwtPayload;
+        if (!id) {
+            throw errorHandler(401);
+        }
         const user = await User.findById(id);
         if (!user || !user.token || user.token !== token) {
             throw errorHandler(401)
@@ -33,13 +35,10 @@ const authenticate: RequestHandlerWithUser<AuthenticatedRequest> = catchAsync(as
         req.user = user;
         next();
     } catch (error) {
-        next(error)
+        next(errorHandler(401))
     }
 
-})
-
-const authenticateHandler: RequestHandler = (req, res, next) => {
-    return authenticate(req as AuthenticatedRequest, res, next).catch(next)
 }
 
-export default authenticateHandler;
+
+export default authenticate;

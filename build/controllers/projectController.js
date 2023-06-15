@@ -20,15 +20,12 @@ const plcholder = "https://res.cloudinary.com/dlw7wjlp3/image/upload/v1686575064
 const plcId = 'fghksdju374gdfhg';
 const getAllProjects = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const projects = yield models_1.Project.find();
-    console.log(projects);
     res.status(200).json(projects);
 }));
 const addProject = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { title, description } = req.body;
-        console.log(req.file);
         if (!req.file) {
-            console.log('here goku');
             const project = models_1.Project.create({
                 title,
                 description,
@@ -36,7 +33,6 @@ const addProject = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             });
             return res.status(201).json(project);
         }
-        console.log(req.file);
         const result = yield cloudy_1.default.uploader.upload(req.file.path, {
             public_id: `${(0, nanoid_1.nanoid)()}`,
             folder: "products",
@@ -57,7 +53,6 @@ const updateProject = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         const { projectId } = req.params;
         const { title, description } = req.body;
         if (!req.file) {
-            console.log("win");
             const project = yield models_1.Project.findByIdAndUpdate(projectId, {
                 title,
                 description,

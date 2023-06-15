@@ -1,6 +1,7 @@
 import mongoose, { Schema, Types} from "mongoose";
 
 interface IComment extends Document {
+  projectId: string;
   content: string;
   createdAt: Date;
   updatedAt: Date;
@@ -13,6 +14,10 @@ interface IComment extends Document {
 
 const commentSchema = new Schema<IComment>(
   {
+    projectId: {
+      type: String,
+      required: true
+    },
     content: {
       type: String,
       required: true,

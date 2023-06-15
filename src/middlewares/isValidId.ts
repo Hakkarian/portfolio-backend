@@ -8,9 +8,9 @@ const isValidId = async (req: Request, res: Response, next: NextFunction) => {
     if (!project) {
         throw errorHandler(400, "Id is invalid.")
     }
-    console.log('middlewares', project)
 
     next();
 }
+
 
 export default isValidId;

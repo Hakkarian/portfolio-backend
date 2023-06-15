@@ -11,7 +11,6 @@ const plcId = 'fghksdju374gdfhg';
 
 const getAllProjects = catchAsync(async(req, res) => {
   const projects = await Project.find();
-  console.log(projects)
     res.status(200).json(projects)
 })
 
@@ -19,10 +18,8 @@ const addProject = async (req: Request, res: Response<any>) => {
     try {
       const { title, description } = req.body;
       
-      console.log(req.file)
 
       if (!req.file) {
-          console.log('here goku')
           const project = Project.create({
             title,
             description,
@@ -30,7 +27,6 @@ const addProject = async (req: Request, res: Response<any>) => {
           });
           return res.status(201).json(project);
       } 
-      console.log(req.file)
         
       const result = await cloudinary.uploader.upload(req.file.path, {
           public_id: `${nanoid()}`,
@@ -54,7 +50,6 @@ const updateProject = async (req: Request, res: Response) => {
     const { title, description } = req.body;
 
     if (!req.file) {
-      console.log("win");
       const project = await Project.findByIdAndUpdate(
         projectId,
         {

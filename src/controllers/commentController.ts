@@ -14,14 +14,16 @@ const getAllComments = catchAsync(async (req, res) => {
 
 
 const addComment = async (req: AuthenticatedRequest, res: Response) => {
+  const { projectId } = req.params;
   const userId = req.user?._id;
   const username = req.user?.username;
   const email = req.user?.email;
     const { content } = req.body;
-    const comment = await Comment.create({
-      content,
-      author: {username, email, userId},
-    });
+  const comment = await Comment.create({
+    projectId,
+    content,
+    author: { username, email, userId },
+  });
     res.status(201).json(comment);
   };
 

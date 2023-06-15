@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const cloudinary_1 = require("cloudinary");
-console.log(process.env.CLOUDY_API);
 const cloudyName = process.env.CLOUDY_NAME;
 const cloudyApi = process.env.CLOUDY_API;
 const cloudySecret = process.env.CLOUDY_SECRET;

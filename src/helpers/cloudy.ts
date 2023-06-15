@@ -1,7 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
 
-console.log(process.env.CLOUDY_API)
-
 const cloudyName = process.env.CLOUDY_NAME;
 const cloudyApi = process.env.CLOUDY_API;
 const cloudySecret = process.env.CLOUDY_SECRET;
