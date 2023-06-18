@@ -45,6 +45,9 @@ const commentSchema = new mongoose_1.Schema({
         username: {
             type: String,
         },
+        avatar: {
+            type: String
+        },
         email: {
             type: String,
         },

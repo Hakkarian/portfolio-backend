@@ -34,6 +34,9 @@ const commentSchema = new Schema<IComment>(
       username: {
         type: String,
       },
+      avatar: {
+        type: String
+      },
       email: {
         type: String,
       },
