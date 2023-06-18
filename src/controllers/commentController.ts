@@ -18,11 +18,12 @@ const addComment = async (req: AuthenticatedRequest, res: Response) => {
   const userId = req.user?._id;
   const username = req.user?.username;
   const email = req.user?.email;
+  const avatar = req.user?.avatar;
     const { content } = req.body;
   const comment = await Comment.create({
     projectId,
     content,
-    author: { username, email, userId },
+    author: { username, email, avatar, userId },
   });
     res.status(201).json(comment);
   };
