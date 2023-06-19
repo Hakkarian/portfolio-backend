@@ -18,12 +18,9 @@ const getAllComments = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0,
     res.status(200).json(comments);
 }));
 const addComment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c, _d;
     const { projectId } = req.params;
-    const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a._id;
-    const username = (_b = req.user) === null || _b === void 0 ? void 0 : _b.username;
-    const email = (_c = req.user) === null || _c === void 0 ? void 0 : _c.email;
-    const avatar = (_d = req.user) === null || _d === void 0 ? void 0 : _d.avatar;
+    const { _id, username, email, avatar } = req.user;
+    const userId = _id;
     const { content } = req.body;
     const comment = yield models_1.Comment.create({
         projectId,
