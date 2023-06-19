@@ -48,12 +48,13 @@ const register = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 
     const salt = 10;
     const hashedPassword = yield bcryptjs_1.default.hash(req.body.password, salt);
     const avatar = (0, helpers_1.userAvatar)(email);
+    console.log(avatar);
     const verificationToken = (0, nanoid_1.nanoid)();
     // Create a new user
-    const user = new models_1.User({
+    const user = yield models_1.User.create({
         username: req.body.username,
         email: req.body.email,
-        avatar,
+        avatar: { url: avatar, id: "" },
         password: hashedPassword,
     });
     //  const verifyEmail = {
@@ -62,8 +63,6 @@ const register = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 
     //    html: `<a target="_blank" href="${baseUrl}/users/verify/${user.verificationToken}">Click me to verify email</a>`,
     //  };
     //  await sendNodeEmail(verifyEmail);
-    // save the user
-    yield user.save();
     res.status(200).json({ message: "User created successfully" });
 }));
 const login = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -131,10 +130,11 @@ const repeatVerifyEmail = (0, helpers_1.catchAsync)((req, res) => __awaiter(void
 }));
 const updateInfo = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { userId } = req.params;
-    const { username, email, avatar } = req.user;
+    const { avatar } = req.user;
+    const { username, email } = req.body;
     if (!req.file) {
         const user = yield models_1.User.findByIdAndUpdate(userId, { username,
-            email, avatar: { url: avatar, id: "" }
+            email, avatar
         }, { new: true });
         if (!user) {
             throw (0, helpers_1.ErrorHandler)(404, "User not found.");
@@ -146,12 +146,12 @@ const updateInfo = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, voi
         if (!userOld) {
             throw (0, helpers_1.ErrorHandler)(404, "User not found.");
         }
-        if (!userOld.avatar.id) {
-            throw (0, helpers_1.ErrorHandler)(404, "Avatar not found.");
-        }
         const result = yield cloudy_1.default.uploader.upload(req.file.path, {
             public_id: `${(0, nanoid_1.nanoid)()}`,
             folder: "users",
+            width: 40,
+            height: 40,
+            crop: 'fill'
         });
         const user = yield models_1.User.findByIdAndUpdate(userId, {
             username,

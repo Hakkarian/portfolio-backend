@@ -22,13 +22,14 @@ const register = catchAsync(async (req: Request, res: Response) => {
   const hashedPassword = await bcryptjs.hash(req.body.password, salt);
 
   const avatar = userAvatar(email);
+  console.log(avatar)
 
   const verificationToken = nanoid();
   // Create a new user
-  const user = new User({
+  const user = await User.create({
     username: req.body.username,
     email: req.body.email,
-    avatar,
+    avatar: {url: avatar, id: ""},
     password: hashedPassword,
   });
 
@@ -39,9 +40,6 @@ const register = catchAsync(async (req: Request, res: Response) => {
   //  };
 
   //  await sendNodeEmail(verifyEmail);
-
-  // save the user
-  await user.save();
 
   res.status(200).json({ message: "User created successfully" });
 });
@@ -136,10 +134,11 @@ const repeatVerifyEmail = catchAsync(async (req, res) => {
 
 const updateInfo = catchAsync(async (req, res) => {
   const { userId } = req.params;
-  const { username, email, avatar } = req.user as UserType;
+  const { avatar } = req.user as UserType;
+  const { username, email } = req.body;
   if (!req.file) {
     const user = await User.findByIdAndUpdate(userId, {username, 
-      email, avatar: {url: avatar, id: ""}
+      email, avatar
     }, {new: true})
     if (!user) {
       throw ErrorHandler(404, "User not found.");
@@ -150,12 +149,12 @@ const updateInfo = catchAsync(async (req, res) => {
     if (!userOld) {
       throw ErrorHandler(404, "User not found.");
     }
-    if (!userOld.avatar.id) {
-      throw ErrorHandler(404, "Avatar not found.");
-    }
     const result = await cloudinary.uploader.upload(req.file.path, {
       public_id: `${nanoid()}`,
       folder: "users",
+      width: 40,
+      height: 40,
+      crop: 'fill'
     });
     const user = await User.findByIdAndUpdate(
       userId,
@@ -169,6 +168,7 @@ const updateInfo = catchAsync(async (req, res) => {
     return res.status(200).json(user);
   }
 })
+
 
 export default {
   register,

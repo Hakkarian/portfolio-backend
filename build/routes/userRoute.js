@@ -18,5 +18,5 @@ router.post("/login", helpers_1.loginLimitter, middlewares_1.default.checkLogin,
 router.post("/logout", middlewares_1.default.authenticate, userController_1.default.logout);
 router.post("/google", googlePassport_1.default.authenticate("google", { scope: ["email", "profile"] }));
 router.post("/verify", middlewares_1.default.checkEmail, userController_1.default.repeatVerifyEmail);
-router.patch("/:userId/update", middlewares_1.default.authenticate, multerPhoto_1.upload.single('image'), userController_1.default.updateInfo);
+router.patch("/:userId/update", middlewares_1.default.authenticate, multerPhoto_1.upload.single('avatar'), userController_1.default.updateInfo);
 exports.default = router;

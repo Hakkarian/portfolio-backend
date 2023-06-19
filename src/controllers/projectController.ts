@@ -72,6 +72,9 @@ const updateProject = async (req: Request, res: Response, next: NextFunction) =>
     const result = await cloudinary.uploader.upload(req.file.path, {
       public_id: `${nanoid()}`,
       folder: "products",
+      width: 250,
+      height: 100,
+      crop: 'fill'
     });
     const project = await Project.findByIdAndUpdate(
       projectId,

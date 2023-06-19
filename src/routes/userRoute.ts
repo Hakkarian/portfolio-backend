@@ -23,7 +23,7 @@ router.post(
   googlePassport.authenticate("google", { scope: ["email", "profile"] })
 );
 router.post("/verify", middlewares.checkEmail, userController.repeatVerifyEmail);
-router.patch("/:userId/update", middlewares.authenticate, upload.single('image'), userController.updateInfo)
+router.patch("/:userId/update", middlewares.authenticate, upload.single('avatar'), userController.updateInfo)
 
 
 export default router;

@@ -73,6 +73,9 @@ const updateProject = (req, res, next) => __awaiter(void 0, void 0, void 0, func
         const result = yield cloudy_1.default.uploader.upload(req.file.path, {
             public_id: `${(0, nanoid_1.nanoid)()}`,
             folder: "products",
+            width: 250,
+            height: 100,
+            crop: 'fill'
         });
         const project = yield models_1.Project.findByIdAndUpdate(projectId, {
             title,
