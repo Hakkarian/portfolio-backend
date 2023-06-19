@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { catchAsync, ErrorHandler } from "../helpers";
 import cloudinary from "../helpers/cloudy";
 import { Project } from "../models";
@@ -41,7 +41,7 @@ const addProject = async (req: Request, res: Response<any>) => {
   }
 };
 
-const updateProject = async (req: Request, res: Response) => {
+const updateProject = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { projectId } = req.params;
     const { title, description } = req.body;
@@ -57,14 +57,14 @@ const updateProject = async (req: Request, res: Response) => {
         { new: true }
       );
       if (!project) {
-        return res.json("Project null");
+        throw ErrorHandler(404, "Project not found.");
       }
       return res.status(200).json(project);
     }
 
     const projectOld = await Project.findById(projectId);
     if (!projectOld) {
-      throw ErrorHandler(404, "No such a project");
+      throw ErrorHandler(404, "Project not found.");
     }
     if (projectOld.image.id) {
       await cloudinary.uploader.destroy(projectOld.image.id);
@@ -84,7 +84,7 @@ const updateProject = async (req: Request, res: Response) => {
     );
     res.status(200).json(project);
   } catch (error) {
-    console.log(error);
+    next(error)
   }
 };
 

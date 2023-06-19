@@ -5,7 +5,7 @@ export interface UserType extends Document {
   _id: string,
   username: string;
   email: string;
-  avatar: string;
+  avatar: { url: string, id: string};
   token: string;
   favorite: Types.ObjectId[];
   verify: boolean;
@@ -25,7 +25,12 @@ const userSchema = new mongoose.Schema<UserType>({
     unique: true,
   },
   avatar: {
-    type: String,
+    url: {
+      type: String
+    },
+    id: {
+      type: String
+    }
   },
   token: {
     type: String,

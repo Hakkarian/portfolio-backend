@@ -11,6 +11,7 @@ import {
 } from "../helpers";
 import { User } from "../models";
 import { UserType } from "../models/userModel";
+import cloudinary from "../helpers/cloudy";
 
 const baseUrl = process.env.BASE_URL;
 
@@ -132,6 +133,42 @@ const repeatVerifyEmail = catchAsync(async (req, res) => {
   res.json({ message: "Email verification success" });
 });
 
+const updateInfo = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const { username, email, avatar } = req.user as UserType;
+  if (!req.file) {
+    const user = await User.findByIdAndUpdate(userId, {username, 
+      email, avatar: {url: avatar, id: ""}
+    }, {new: true})
+    if (!user) {
+      throw ErrorHandler(404, "User not found.");
+    }
+    return res.status(200).json(user);
+  } else {
+    const userOld = await User.findById(userId);
+    if (!userOld) {
+      throw ErrorHandler(404, "User not found.");
+    }
+    if (!userOld.avatar.id) {
+      throw ErrorHandler(404, "Avatar not found.");
+    }
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      public_id: `${nanoid()}`,
+      folder: "users",
+    });
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {
+        username,
+        email,
+        avatar: { url: result.secure_url, id: result.public_id },
+      },
+      { new: true }
+    );
+    return res.status(200).json(user);
+  }
+})
+
 export default {
   register,
   login,
@@ -140,4 +177,5 @@ export default {
   google,
   verifyEmail,
   repeatVerifyEmail,
+  updateInfo
 };

@@ -40,6 +40,7 @@ const jwt = __importStar(require("jsonwebtoken"));
 const nanoid_1 = require("nanoid");
 const helpers_1 = require("../helpers");
 const models_1 = require("../models");
+const cloudy_1 = __importDefault(require("../helpers/cloudy"));
 const baseUrl = process.env.BASE_URL;
 const register = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email } = req.body;
@@ -128,6 +129,38 @@ const repeatVerifyEmail = (0, helpers_1.catchAsync)((req, res) => __awaiter(void
     yield (0, helpers_1.sendNodeEmail)(verifyEmail);
     res.json({ message: "Email verification success" });
 }));
+const updateInfo = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userId } = req.params;
+    const { username, email, avatar } = req.user;
+    if (!req.file) {
+        const user = yield models_1.User.findByIdAndUpdate(userId, { username,
+            email, avatar: { url: avatar, id: "" }
+        }, { new: true });
+        if (!user) {
+            throw (0, helpers_1.ErrorHandler)(404, "User not found.");
+        }
+        return res.status(200).json(user);
+    }
+    else {
+        const userOld = yield models_1.User.findById(userId);
+        if (!userOld) {
+            throw (0, helpers_1.ErrorHandler)(404, "User not found.");
+        }
+        if (!userOld.avatar.id) {
+            throw (0, helpers_1.ErrorHandler)(404, "Avatar not found.");
+        }
+        const result = yield cloudy_1.default.uploader.upload(req.file.path, {
+            public_id: `${(0, nanoid_1.nanoid)()}`,
+            folder: "users",
+        });
+        const user = yield models_1.User.findByIdAndUpdate(userId, {
+            username,
+            email,
+            avatar: { url: result.secure_url, id: result.public_id },
+        }, { new: true });
+        return res.status(200).json(user);
+    }
+}));
 exports.default = {
     register,
     login,
@@ -136,4 +169,5 @@ exports.default = {
     google,
     verifyEmail,
     repeatVerifyEmail,
+    updateInfo
 };

@@ -16,7 +16,12 @@ const userSchema = new mongoose_1.default.Schema({
         unique: true,
     },
     avatar: {
-        type: String,
+        url: {
+            type: String
+        },
+        id: {
+            type: String
+        }
     },
     token: {
         type: String,

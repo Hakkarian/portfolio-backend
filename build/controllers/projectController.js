@@ -48,7 +48,7 @@ const addProject = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         console.log(error);
     }
 });
-const updateProject = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const updateProject = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { projectId } = req.params;
         const { title, description } = req.body;
@@ -59,13 +59,13 @@ const updateProject = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 image: { url: plcholder, id: "" },
             }, { new: true });
             if (!project) {
-                return res.json("Project null");
+                throw (0, helpers_1.ErrorHandler)(404, "Project not found.");
             }
             return res.status(200).json(project);
         }
         const projectOld = yield models_1.Project.findById(projectId);
         if (!projectOld) {
-            throw (0, helpers_1.ErrorHandler)(404, "No such a project");
+            throw (0, helpers_1.ErrorHandler)(404, "Project not found.");
         }
         if (projectOld.image.id) {
             yield cloudy_1.default.uploader.destroy(projectOld.image.id);
@@ -82,7 +82,7 @@ const updateProject = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         res.status(200).json(project);
     }
     catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 const deleteProject = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
