@@ -83,9 +83,10 @@ const current = catchAsync(async (req, res: Response) => {
     email,
     favorite,
     isAdmin,
+    avatar,
     _id: userId,
   } = user as UserType;
-  res.json({ token, user: { username, email, userId, favorite, isAdmin } });
+  res.json({ token, user: { username, email, userId, favorite, isAdmin, avatar } });
 });
 
 const google = catchAsync(async (req: Request, res: Response) => {

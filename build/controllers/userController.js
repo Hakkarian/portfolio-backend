@@ -92,8 +92,8 @@ const logout = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0,
 }));
 const current = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { user } = req;
-    const { token, username, email, favorite, isAdmin, _id: userId, } = user;
-    res.json({ token, user: { username, email, userId, favorite, isAdmin } });
+    const { token, username, email, favorite, isAdmin, avatar, _id: userId, } = user;
+    res.json({ token, user: { username, email, userId, favorite, isAdmin, avatar } });
 }));
 const google = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { _id: userId, email, token, username } = req.user;
