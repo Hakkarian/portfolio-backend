@@ -31,7 +31,7 @@ const addProject = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                 description,
                 image: { url: plcholder, id: "" },
             });
-            return res.status(201).json(project);
+            return res.status(200).json(project);
         }
         const result = yield cloudy_1.default.uploader.upload(req.file.path, {
             public_id: `${(0, nanoid_1.nanoid)()}`,
@@ -42,7 +42,7 @@ const addProject = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             description,
             image: { url: result.secure_url, id: result.public_id },
         });
-        res.status(201).json(project);
+        res.status(200).json(project);
     }
     catch (error) {
         console.log(error);

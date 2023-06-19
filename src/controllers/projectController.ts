@@ -23,9 +23,11 @@ const addProject = async (req: Request, res: Response<any>) => {
         description,
         image: { url: plcholder, id: "" },
       });
-      return res.status(201).json(project);
+      return res.status(200).json(project);
     }
 
+  
+    
     const result = await cloudinary.uploader.upload(req.file.path, {
       public_id: `${nanoid()}`,
       folder: "products",
@@ -35,7 +37,7 @@ const addProject = async (req: Request, res: Response<any>) => {
       description,
       image: { url: result.secure_url, id: result.public_id },
     });
-    res.status(201).json(project);
+    res.status(200).json(project);
   } catch (error) {
     console.log(error);
   }
