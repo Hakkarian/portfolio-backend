@@ -35,7 +35,12 @@ const commentSchema = new Schema<IComment>(
         type: String,
       },
       avatar: {
-        type: String
+        url: {
+          type: String
+        }, 
+        id: {
+          type: String
+        }
       },
       email: {
         type: String,

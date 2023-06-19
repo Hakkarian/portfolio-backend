@@ -46,7 +46,12 @@ const commentSchema = new mongoose_1.Schema({
             type: String,
         },
         avatar: {
-            type: String
+            url: {
+                type: String
+            },
+            id: {
+                type: String
+            }
         },
         email: {
             type: String,
