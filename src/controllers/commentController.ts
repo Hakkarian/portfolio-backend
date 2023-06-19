@@ -8,7 +8,8 @@ import { AuthenticatedRequest } from "../middlewares/authenticate";
 
 
 const getAllComments = catchAsync(async (req, res) => {
-    const comments = await Comment.find().populate("author");
+  const { projectId } = req.params;
+    const comments = await Comment.findById(projectId);
     res.status(200).json(comments);
 });
 
