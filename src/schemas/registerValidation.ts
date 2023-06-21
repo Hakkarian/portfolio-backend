@@ -1,5 +1,5 @@
 import Joi from "joi"
-import { emailRegex, passwordRegex } from "../regex";
+import { emailRegex, nameRegex, passwordRegex } from "../regex";
 
 interface User {
     username: string,
@@ -9,8 +9,9 @@ interface User {
 
 const registerValidation = (data: User) => {
     const schema = Joi.object({
-      username: Joi.string().min(4).max(16).required().messages({
+      username: Joi.string().regex(nameRegex).min(4).max(16).required().messages({
         "string.empty": `Name cannot be an empty field.`,
+        "string.pattern.base": `Name must contain alphanumeric, numbers and underscores only.`,
         "string.min": `Name should have minimum length of 4.`,
         "string.max": `Name should have maximum length of 16.`,
         "any.required": "Name is required.",
