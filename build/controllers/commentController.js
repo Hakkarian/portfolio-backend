@@ -16,7 +16,6 @@ const models_1 = require("../models");
 const getAllComments = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { projectId } = req.params;
     const comments = yield models_1.Comment.find({ projectId });
-    console.log(comments);
     res.status(200).json(comments);
 }));
 const addComment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {

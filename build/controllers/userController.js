@@ -48,7 +48,6 @@ const register = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 
     const salt = 10;
     const hashedPassword = yield bcryptjs_1.default.hash(req.body.password, salt);
     const avatar = (0, helpers_1.userAvatar)(email);
-    console.log(avatar);
     const verificationToken = (0, nanoid_1.nanoid)();
     // Create a new user
     const user = yield models_1.User.create({

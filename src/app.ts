@@ -14,15 +14,6 @@ const app: Application = express();
 const port = process.env.PORT || 5000;
 const mongoUrl: string = process.env.MONGO_URL || '';
 
-app.use(limitter({
-    windowMs: 5000,
-    max: 3,
-    message: {
-        code: 429,
-        message: "Too many requests!"
-    }
-}))
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));

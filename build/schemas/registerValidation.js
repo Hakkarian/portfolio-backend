@@ -7,8 +7,9 @@ const joi_1 = __importDefault(require("joi"));
 const regex_1 = require("../regex");
 const registerValidation = (data) => {
     const schema = joi_1.default.object({
-        username: joi_1.default.string().min(4).max(16).required().messages({
+        username: joi_1.default.string().regex(regex_1.nameRegex).min(4).max(16).required().messages({
             "string.empty": `Name cannot be an empty field.`,
+            "string.pattern.base": `Name must contain alphanumeric, numbers and underscores only.`,
             "string.min": `Name should have minimum length of 4.`,
             "string.max": `Name should have maximum length of 16.`,
             "any.required": "Name is required.",

@@ -22,7 +22,6 @@ const register = catchAsync(async (req: Request, res: Response) => {
   const hashedPassword = await bcryptjs.hash(req.body.password, salt);
 
   const avatar = userAvatar(email);
-  console.log(avatar)
 
   const verificationToken = nanoid();
   // Create a new user

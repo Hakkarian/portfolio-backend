@@ -8,21 +8,12 @@ dotenv_1.default.config();
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const mongoose_1 = __importDefault(require("mongoose"));
-const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const userRoute_1 = __importDefault(require("./routes/userRoute"));
 const projectRoute_1 = __importDefault(require("./routes/projectRoute"));
 const commentRoute_1 = __importDefault(require("./routes/commentRoute"));
 const app = (0, express_1.default)();
 const port = process.env.PORT || 5000;
 const mongoUrl = process.env.MONGO_URL || '';
-app.use((0, express_rate_limit_1.default)({
-    windowMs: 5000,
-    max: 3,
-    message: {
-        code: 429,
-        message: "Too many requests!"
-    }
-}));
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 app.use(express_1.default.static('public'));
