@@ -56,12 +56,12 @@ const register = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 
         avatar: { url: avatar, id: "" },
         password: hashedPassword,
     });
-    //  const verifyEmail = {
-    //    to: req.body.email,
-    //    subject: "Verify email",
-    //    html: `<a target="_blank" href="${baseUrl}/users/verify/${user.verificationToken}">Click me to verify email</a>`,
-    //  };
-    //  await sendNodeEmail(verifyEmail);
+    const verifyEmail = {
+        to: req.body.email,
+        subject: "Verify email",
+        html: `<a target="_blank" href="${baseUrl}/users/verify/${user.verificationToken}">Click me to verify email</a>`,
+    };
+    yield (0, helpers_1.sendNodeEmail)(verifyEmail);
     res.status(200).json({ message: "User created successfully" });
 }));
 const login = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {

@@ -32,13 +32,13 @@ const register = catchAsync(async (req: Request, res: Response) => {
     password: hashedPassword,
   });
 
-  //  const verifyEmail = {
-  //    to: req.body.email,
-  //    subject: "Verify email",
-  //    html: `<a target="_blank" href="${baseUrl}/users/verify/${user.verificationToken}">Click me to verify email</a>`,
-  //  };
+   const verifyEmail = {
+     to: req.body.email,
+     subject: "Verify email",
+     html: `<a target="_blank" href="${baseUrl}/users/verify/${user.verificationToken}">Click me to verify email</a>`,
+   };
 
-  //  await sendNodeEmail(verifyEmail);
+   await sendNodeEmail(verifyEmail);
 
   res.status(200).json({ message: "User created successfully" });
 });

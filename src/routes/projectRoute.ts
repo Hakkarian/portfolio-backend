@@ -7,8 +7,19 @@ import { upload } from '../helpers/multerPhoto';
 const router = express.Router();
 
 router.get("/", projectCtrl.getAllProjects)
-router.post("/", upload.single('image'), projectCtrl.addProject);
-router.patch("/:projectId", upload.single('image'), projectCtrl.updateProject);
-router.delete("/:projectId", projectCtrl.deleteProject);
+router.post("/", middlewares.authenticate, middlewares.isAdmin, upload.single('image'), projectCtrl.addProject);
+router.patch(
+  "/:projectId",
+  middlewares.authenticate,
+  middlewares.isAdmin,
+  upload.single("image"),
+  projectCtrl.updateProject
+);
+router.delete(
+  "/:projectId",
+  middlewares.authenticate,
+  middlewares.isAdmin,
+  projectCtrl.deleteProject
+);
 
 export default router;
