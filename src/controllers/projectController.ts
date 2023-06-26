@@ -18,25 +18,24 @@ const addProject = async (req: Request, res: Response<any>) => {
     const { title, description } = req.body;
 
     if (!req.file) {
-      const project = Project.create({
+      console.log('no such photo');
+      const project = await Project.create({
         title,
         description,
         image: { url: plcholder, id: "" },
       });
       return res.status(200).json(project);
     }
-
-  
-    
     const result = await cloudinary.uploader.upload(req.file.path, {
       public_id: `${nanoid()}`,
       folder: "products",
     });
-    const project = Project.create({
+    const project = await Project.create({
       title,
       description,
       image: { url: result.secure_url, id: result.public_id },
     });
+    console.log(project);
     res.status(200).json(project);
   } catch (error) {
     console.log(error);

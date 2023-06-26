@@ -22,23 +22,31 @@ const addComment = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     const { projectId } = req.params;
     const { _id, username, email, avatar } = req.user;
     const userId = _id;
+    console.log("comment body");
+    console.log('comment body', req.body);
     const { content } = req.body;
     const comment = yield models_1.Comment.create({
         projectId,
-        content,
+        content: content,
         author: { username, email, avatar, userId },
     });
+    console.log('add comment', comment);
     res.status(201).json(comment);
 });
 const updateComment = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { commentId } = req.params;
+    console.log('comment upd hello');
+    const { projectId, commentId } = req.params;
+    console.log("comment upd commentId", commentId);
+    console.log('comment upd body', req.body);
     const { content } = req.body;
-    const comment = yield models_1.Comment.findByIdAndUpdate(commentId, req.body, { new: true });
-    res.status(201).json(comment);
+    const comment = yield models_1.Comment.findByIdAndUpdate(commentId, { content }, { new: true });
+    const comments = yield models_1.Comment.find({ projectId });
+    res.status(200).json(comments);
 }));
 const deleteComment = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { commentId } = req.params;
+    const { projectId, commentId } = req.params;
     const comment = yield models_1.Comment.findByIdAndDelete(commentId);
-    res.status(201).json({ message: "Comment has been deleted succesfully" });
+    const comments = yield models_1.Comment.find({ projectId });
+    res.status(200).json(comments);
 }));
 exports.default = { getAllComments, addComment, updateComment, deleteComment };

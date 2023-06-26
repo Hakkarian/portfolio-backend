@@ -14,32 +14,39 @@ const getAllComments = catchAsync(async (req, res) => {
     res.status(200).json(comments);
 });
 
-
 const addComment = async (req: Request, res: Response) => {
   const { projectId } = req.params;
   const { _id, username, email, avatar } = req.user as UserType;
   const userId = _id;
-
-    const { content } = req.body;
+  console.log("comment body");
+  console.log('comment body', req.body)
+  const { content } = req.body;
   const comment = await Comment.create({
     projectId,
-    content,
+    content: content,
     author: { username, email, avatar, userId },
   });
+  console.log('add comment', comment)
     res.status(201).json(comment);
-  };
-
+};
+  
 const updateComment = catchAsync(async (req, res) => {
-    const { commentId } = req.params;
+  console.log('comment upd hello')
+  const { projectId, commentId } = req.params;
+  console.log("comment upd commentId", commentId);
+  console.log('comment upd body', req.body);
   const { content } = req.body;
-  const comment = await Comment.findByIdAndUpdate(commentId, req.body, {new: true});
-  res.status(201).json(comment);
+  const comment = await Comment.findByIdAndUpdate(commentId, { content }, { new: true });
+  const comments = await Comment.find({projectId});
+  res.status(200).json(comments);
 });
 
+
 const deleteComment = catchAsync(async (req, res) => {
-  const { commentId } = req.params;
+  const { projectId, commentId } = req.params;
   const comment = await Comment.findByIdAndDelete(commentId);
-  res.status(201).json({message: "Comment has been deleted succesfully"});
+  const comments = await Comment.find({ projectId });
+  res.status(200).json(comments);
 });
 
 export default { getAllComments, addComment, updateComment, deleteComment };

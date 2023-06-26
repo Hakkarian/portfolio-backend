@@ -26,7 +26,8 @@ const addProject = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     try {
         const { title, description } = req.body;
         if (!req.file) {
-            const project = models_1.Project.create({
+            console.log('no such photo');
+            const project = yield models_1.Project.create({
                 title,
                 description,
                 image: { url: plcholder, id: "" },
@@ -37,11 +38,12 @@ const addProject = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             public_id: `${(0, nanoid_1.nanoid)()}`,
             folder: "products",
         });
-        const project = models_1.Project.create({
+        const project = yield models_1.Project.create({
             title,
             description,
             image: { url: result.secure_url, id: result.public_id },
         });
+        console.log(project);
         res.status(200).json(project);
     }
     catch (error) {
