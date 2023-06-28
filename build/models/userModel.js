@@ -7,7 +7,6 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const userSchema = new mongoose_1.default.Schema({
     username: {
         type: String,
-        required: true,
         unique: true,
     },
     email: {
@@ -15,32 +14,44 @@ const userSchema = new mongoose_1.default.Schema({
         required: true,
         unique: true,
     },
+    birthday: {
+        type: String,
+    },
+    location: {
+        type: String,
+    },
+    phone: {
+        type: String,
+    },
     avatar: {
         url: {
-            type: String
+            type: String,
         },
         id: {
-            type: String
-        }
+            type: String,
+        },
     },
     token: {
         type: String,
-        default: ""
+        default: "",
     },
-    favorite: [{
-            type: mongoose_1.default.Schema.Types.ObjectId, ref: 'Project'
-        }],
+    favorite: [
+        {
+            type: mongoose_1.default.Schema.Types.ObjectId,
+            ref: "Project",
+        },
+    ],
     verify: {
         type: Boolean,
-        default: false
+        default: false,
     },
     verificationToken: {
         type: String,
     },
     isAdmin: {
         type: Boolean,
-        default: false
-    }
+        default: false,
+    },
 }, { versionKey: false });
 const User = mongoose_1.default.model('User', userSchema, 'users');
 exports.default = User;

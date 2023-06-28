@@ -53,6 +53,9 @@ const register = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 
     const user = yield models_1.User.create({
         username: req.body.username,
         email: req.body.email,
+        birthday: "",
+        location: "",
+        phone: "",
         avatar: { url: avatar, id: "" },
         password: hashedPassword,
     });
@@ -62,7 +65,7 @@ const register = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 
         html: `<a target="_blank" href="${baseUrl}/users/verify/${user.verificationToken}">Click me to verify email</a>`,
     };
     yield (0, helpers_1.sendNodeEmail)(verifyEmail);
-    res.status(200).json({ message: "User created successfully" });
+    res.status(200).json(user);
 }));
 const login = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield models_1.User.findOne({ email: req.body.email });
@@ -78,7 +81,20 @@ const login = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, 
     user.save();
     res
         .status(200)
-        .json({ token, user: { email: user === null || user === void 0 ? void 0 : user.email, userId: user === null || user === void 0 ? void 0 : user._id } });
+        .json({
+        token,
+        user: {
+            username: user.username,
+            email: user.email,
+            location: user.location,
+            birthday: user.birthday,
+            phone: user.phone,
+            userId: user._id,
+            favorite: user.favorite,
+            isAdmin: user.isAdmin,
+            avatar: user.avatar,
+        },
+    });
 }));
 const logout = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { _id } = req.user;
@@ -90,12 +106,12 @@ const logout = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0,
 }));
 const current = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { user } = req;
-    const { token, username, email, favorite, isAdmin, avatar, _id: userId, } = user;
-    res.json({ token, user: { username, email, userId, favorite, isAdmin, avatar } });
+    const { token, username, email, location, birthday, phone, favorite, isAdmin, avatar, _id: userId, } = user;
+    res.json({ token, user: { username, email, location, birthday, phone, userId, favorite, isAdmin, avatar } });
 }));
 const google = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { _id: userId, email, token, username } = req.user;
-    res.redirect(`http://localhost:3000?token=${token}&email=${email}&id=${userId}&name=${username}`);
+    res.redirect(`http://localhost:3000?token=${token}&email=${email}&id=${userId}&username=${username}`);
 }));
 const verifyEmail = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { verificationToken } = req.params;
@@ -129,11 +145,11 @@ const repeatVerifyEmail = (0, helpers_1.catchAsync)((req, res) => __awaiter(void
 }));
 const updateInfo = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { userId } = req.params;
-    const { avatar } = req.user;
-    const { username, email } = req.body;
+    const { avatar, token } = req.user;
+    const { username, email, location, birthday, phone } = req.body;
     if (!req.file) {
         const user = yield models_1.User.findByIdAndUpdate(userId, { username,
-            email, avatar
+            email, location, birthday, phone, avatar
         }, { new: true });
         if (!user) {
             throw (0, helpers_1.ErrorHandler)(404, "User not found.");
@@ -155,9 +171,25 @@ const updateInfo = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, voi
         const user = yield models_1.User.findByIdAndUpdate(userId, {
             username,
             email,
+            birthday,
+            location,
+            phone,
             avatar: { url: result.secure_url, id: result.public_id },
         }, { new: true });
-        return res.status(200).json(user);
+        return res.status(200).json({
+            token,
+            user: {
+                username: user === null || user === void 0 ? void 0 : user.username,
+                email: user === null || user === void 0 ? void 0 : user.email,
+                location: user === null || user === void 0 ? void 0 : user.location,
+                birthday: user === null || user === void 0 ? void 0 : user.birthday,
+                phone: user === null || user === void 0 ? void 0 : user.phone,
+                userId: user === null || user === void 0 ? void 0 : user._id,
+                favorite: user === null || user === void 0 ? void 0 : user.favorite,
+                isAdmin: user === null || user === void 0 ? void 0 : user.isAdmin,
+                avatar: user === null || user === void 0 ? void 0 : user.avatar,
+            },
+        });
     }
 }));
 exports.default = {

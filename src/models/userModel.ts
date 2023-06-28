@@ -5,6 +5,9 @@ export interface UserType extends Document {
   _id: string,
   username: string;
   email: string;
+  birthday: string;
+  location: string;
+  phone: string;
   avatar: { url: string, id: string};
   token: string;
   favorite: Types.ObjectId[];
@@ -13,44 +16,59 @@ export interface UserType extends Document {
   isAdmin: boolean;
 }
 
-const userSchema = new mongoose.Schema<UserType>({
-  username: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  avatar: {
-    url: {
-      type: String
+const userSchema = new mongoose.Schema<UserType>(
+  {
+    username: {
+      type: String,
+      unique: true,
     },
-    id: {
-      type: String
-    }
-  },
-  token: {
-    type: String,
-    default: ""
-  },
-    favorite: [{
-        type: mongoose.Schema.Types.ObjectId, ref: 'Project'
-  }],
-  verify: {
-    type: Boolean,
-    default: false
-  },
-  verificationToken: {
-    type: String,
-  },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    birthday: {
+      type: String,
+    },
+    location: {
+      type: String,
+    },
+    phone: {
+      type: String,
+    },
+    avatar: {
+      url: {
+        type: String,
+      },
+      id: {
+        type: String,
+      },
+    },
+    token: {
+      type: String,
+      default: "",
+    },
+    favorite: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Project",
+      },
+    ],
+    verify: {
+      type: Boolean,
+      default: false,
+    },
+    verificationToken: {
+      type: String,
+    },
     isAdmin: {
-        type: Boolean,
-        default: false
-    }
-}, {versionKey: false});
+      type: Boolean,
+      default: false,
+    },
+  },
+  { versionKey: false }
+);
+
 
 const User = mongoose.model<UserType>('User', userSchema, 'users')
 

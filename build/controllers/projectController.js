@@ -12,10 +12,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const nanoid_1 = require("nanoid");
+const fs_1 = __importDefault(require("fs"));
 const helpers_1 = require("../helpers");
 const cloudy_1 = __importDefault(require("../helpers/cloudy"));
 const models_1 = require("../models");
-const nanoid_1 = require("nanoid");
 const plcholder = "https://res.cloudinary.com/dlw7wjlp3/image/upload/v1686575064/placeholder-product_zhkvqu.webp";
 const plcId = "fghksdju374gdfhg";
 const getAllProjects = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -75,16 +76,21 @@ const updateProject = (req, res, next) => __awaiter(void 0, void 0, void 0, func
         const result = yield cloudy_1.default.uploader.upload(req.file.path, {
             public_id: `${(0, nanoid_1.nanoid)()}`,
             folder: "products",
-            width: 250,
-            height: 100,
-            crop: 'fill'
+        });
+        fs_1.default.unlink(req.file.path, (err) => {
+            if (err) {
+                console.log('An error occured while deleting your file');
+                return res.status(404).json({ message: 'File does not exist' });
+            }
         });
         const project = yield models_1.Project.findByIdAndUpdate(projectId, {
             title,
             description,
             image: { url: result.secure_url, id: result.public_id },
         }, { new: true });
-        res.status(200).json(project);
+        const projects = yield models_1.Project.find();
+        console.log('projects', projects);
+        res.status(200).json(projects);
     }
     catch (error) {
         next(error);

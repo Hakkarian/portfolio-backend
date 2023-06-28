@@ -28,6 +28,9 @@ const register = catchAsync(async (req: Request, res: Response) => {
   const user = await User.create({
     username: req.body.username,
     email: req.body.email,
+    birthday: "",
+    location: "",
+    phone: "",
     avatar: {url: avatar, id: ""},
     password: hashedPassword,
   });
@@ -40,7 +43,7 @@ const register = catchAsync(async (req: Request, res: Response) => {
 
    await sendNodeEmail(verifyEmail);
 
-  res.status(200).json({ message: "User created successfully" });
+  res.status(200).json(user);
 });
 
 const login = catchAsync(async (req: Request, res: Response) => {
@@ -60,7 +63,20 @@ const login = catchAsync(async (req: Request, res: Response) => {
 
   res
     .status(200)
-    .json({ token, user: { email: user?.email, userId: user?._id } });
+    .json({
+      token,
+      user: {
+        username: user.username,
+        email: user.email,
+        location: user.location,
+        birthday: user.birthday,
+        phone: user.phone,
+        userId: user._id,
+        favorite: user.favorite,
+        isAdmin: user.isAdmin,
+        avatar: user.avatar,
+      },
+    });
 });
 
 const logout = catchAsync(async (req, res: Response) => {
@@ -78,19 +94,22 @@ const current = catchAsync(async (req, res: Response) => {
     token,
     username,
     email,
+    location,
+    birthday,
+    phone,
     favorite,
     isAdmin,
     avatar,
     _id: userId,
   } = user as UserType;
-  res.json({ token, user: { username, email, userId, favorite, isAdmin, avatar } });
+  res.json({ token, user: { username, email, location, birthday, phone, userId, favorite, isAdmin, avatar } });
 });
 
 const google = catchAsync(async (req: Request, res: Response) => {
   const { _id: userId, email, token, username } = req.user as UserType;
 
   res.redirect(
-    `http://localhost:3000?token=${token}&email=${email}&id=${userId}&name=${username}`
+    `http://localhost:3000?token=${token}&email=${email}&id=${userId}&username=${username}`
   );
 });
 
@@ -119,6 +138,7 @@ const repeatVerifyEmail = catchAsync(async (req, res) => {
   if (user.verify) {
     throw ErrorHandler(400, "Verification has already been passed");
   }
+  
 
   const verifyEmail = {
     to: email,
@@ -133,11 +153,11 @@ const repeatVerifyEmail = catchAsync(async (req, res) => {
 
 const updateInfo = catchAsync(async (req, res) => {
   const { userId } = req.params;
-  const { avatar } = req.user as UserType;
-  const { username, email } = req.body;
+  const { avatar, token } = req.user as UserType;
+  const { username, email, location, birthday, phone } = req.body;
   if (!req.file) {
     const user = await User.findByIdAndUpdate(userId, {username, 
-      email, avatar
+      email, location, birthday, phone, avatar
     }, {new: true})
     if (!user) {
       throw ErrorHandler(404, "User not found.");
@@ -160,13 +180,30 @@ const updateInfo = catchAsync(async (req, res) => {
       {
         username,
         email,
+        birthday,
+        location, 
+        phone,
         avatar: { url: result.secure_url, id: result.public_id },
       },
       { new: true }
     );
-    return res.status(200).json(user);
+    return res.status(200).json({
+      token,
+      user: {
+        username: user?.username,
+        email: user?.email,
+        location: user?.location,
+        birthday: user?.birthday,
+        phone: user?.phone,
+        userId: user?._id,
+        favorite: user?.favorite,
+        isAdmin: user?.isAdmin,
+        avatar: user?.avatar,
+      },
+    });
   }
 })
+
 
 
 export default {

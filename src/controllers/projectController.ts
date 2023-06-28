@@ -1,8 +1,9 @@
 import { NextFunction, Request, Response } from "express";
+import { nanoid } from "nanoid";
+import fs from 'fs';
 import { catchAsync, ErrorHandler } from "../helpers";
 import cloudinary from "../helpers/cloudy";
 import { Project } from "../models";
-import { nanoid } from "nanoid";
 
 const plcholder =
   "https://res.cloudinary.com/dlw7wjlp3/image/upload/v1686575064/placeholder-product_zhkvqu.webp";
@@ -73,10 +74,14 @@ const updateProject = async (req: Request, res: Response, next: NextFunction) =>
     const result = await cloudinary.uploader.upload(req.file.path, {
       public_id: `${nanoid()}`,
       folder: "products",
-      width: 250,
-      height: 100,
-      crop: 'fill'
     });
+    fs.unlink(req.file.path, (err) => {
+      if (err) {
+        console.log('An error occured while deleting your file');
+        return res.status(404).json({message: 'File does not exist'})
+      }
+    })
+    
     const project = await Project.findByIdAndUpdate(
       projectId,
       {
@@ -86,7 +91,9 @@ const updateProject = async (req: Request, res: Response, next: NextFunction) =>
       },
       { new: true }
     );
-    res.status(200).json(project);
+    const projects = await Project.find();
+    console.log('projects', projects)
+    res.status(200).json(projects);
   } catch (error) {
     next(error)
   }
