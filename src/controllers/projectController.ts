@@ -49,6 +49,7 @@ const updateProject = async (req: Request, res: Response, next: NextFunction) =>
     const { title, description } = req.body;
 
     if (!req.file) {
+      console.log("file does not exist");
       const project = await Project.findByIdAndUpdate(
         projectId,
         {
@@ -61,9 +62,10 @@ const updateProject = async (req: Request, res: Response, next: NextFunction) =>
       if (!project) {
         throw ErrorHandler(404, "Project not found.");
       }
-      return res.status(200).json(project);
+      const projects = await Project.find()
+      return res.status(200).json(projects);
     }
-
+    console.log('file exists')
     const projectOld = await Project.findById(projectId);
     if (!projectOld) {
       throw ErrorHandler(404, "Project not found.");

@@ -8,6 +8,6 @@ const crypto_1 = __importDefault(require("crypto"));
 const gravatar_1 = __importDefault(require("gravatar"));
 const userAvatar = (data) => {
     const md5Hash = crypto_1.default.createHash('md5').update(data.trim().toLowerCase()).digest('hex');
-    return gravatar_1.default.url(md5Hash, { s: '200', r: 'pg', d: 'identicon' });
+    return gravatar_1.default.url(md5Hash, { s: '40', r: 'pg', d: 'identicon' });
 };
 exports.userAvatar = userAvatar;

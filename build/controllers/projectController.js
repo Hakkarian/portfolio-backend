@@ -56,6 +56,7 @@ const updateProject = (req, res, next) => __awaiter(void 0, void 0, void 0, func
         const { projectId } = req.params;
         const { title, description } = req.body;
         if (!req.file) {
+            console.log("file does not exist");
             const project = yield models_1.Project.findByIdAndUpdate(projectId, {
                 title,
                 description,
@@ -64,8 +65,10 @@ const updateProject = (req, res, next) => __awaiter(void 0, void 0, void 0, func
             if (!project) {
                 throw (0, helpers_1.ErrorHandler)(404, "Project not found.");
             }
-            return res.status(200).json(project);
+            const projects = yield models_1.Project.find();
+            return res.status(200).json(projects);
         }
+        console.log('file exists');
         const projectOld = yield models_1.Project.findById(projectId);
         if (!projectOld) {
             throw (0, helpers_1.ErrorHandler)(404, "Project not found.");

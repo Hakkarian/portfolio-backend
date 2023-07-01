@@ -70,6 +70,7 @@ const userSchema = new mongoose.Schema<UserType>(
 );
 
 
+
 const User = mongoose.model<UserType>('User', userSchema, 'users')
 
 export default User;

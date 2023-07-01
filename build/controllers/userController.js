@@ -37,6 +37,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jwt = __importStar(require("jsonwebtoken"));
+const fs_1 = __importDefault(require("fs"));
 const nanoid_1 = require("nanoid");
 const helpers_1 = require("../helpers");
 const models_1 = require("../models");
@@ -154,12 +155,27 @@ const updateInfo = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, voi
         if (!user) {
             throw (0, helpers_1.ErrorHandler)(404, "User not found.");
         }
-        return res.status(200).json(user);
+        yield models_1.Comment.findByIdAndUpdate(userId);
+        console.log('user no file', user);
+        return res.status(200).json({
+            username: user === null || user === void 0 ? void 0 : user.username,
+            email: user === null || user === void 0 ? void 0 : user.email,
+            location: user === null || user === void 0 ? void 0 : user.location,
+            birthday: user === null || user === void 0 ? void 0 : user.birthday,
+            phone: user === null || user === void 0 ? void 0 : user.phone,
+            userId: user === null || user === void 0 ? void 0 : user._id,
+            favorite: user === null || user === void 0 ? void 0 : user.favorite,
+            isAdmin: user === null || user === void 0 ? void 0 : user.isAdmin,
+            avatar: user === null || user === void 0 ? void 0 : user.avatar,
+        });
     }
     else {
         const userOld = yield models_1.User.findById(userId);
         if (!userOld) {
             throw (0, helpers_1.ErrorHandler)(404, "User not found.");
+        }
+        if (userOld.avatar.id) {
+            yield cloudy_1.default.uploader.destroy(userOld.avatar.id);
         }
         const result = yield cloudy_1.default.uploader.upload(req.file.path, {
             public_id: `${(0, nanoid_1.nanoid)()}`,
@@ -168,6 +184,13 @@ const updateInfo = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, voi
             height: 40,
             crop: 'fill'
         });
+        fs_1.default.unlink(req.file.path, (err) => {
+            if (err) {
+                console.log("An error occured while deleting your file");
+                return res.status(404).json("Avatar not found");
+            }
+        });
+        console.log("avatar deleted");
         const user = yield models_1.User.findByIdAndUpdate(userId, {
             username,
             email,
@@ -176,19 +199,17 @@ const updateInfo = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, voi
             phone,
             avatar: { url: result.secure_url, id: result.public_id },
         }, { new: true });
+        console.log('upd user', user);
         return res.status(200).json({
-            token,
-            user: {
-                username: user === null || user === void 0 ? void 0 : user.username,
-                email: user === null || user === void 0 ? void 0 : user.email,
-                location: user === null || user === void 0 ? void 0 : user.location,
-                birthday: user === null || user === void 0 ? void 0 : user.birthday,
-                phone: user === null || user === void 0 ? void 0 : user.phone,
-                userId: user === null || user === void 0 ? void 0 : user._id,
-                favorite: user === null || user === void 0 ? void 0 : user.favorite,
-                isAdmin: user === null || user === void 0 ? void 0 : user.isAdmin,
-                avatar: user === null || user === void 0 ? void 0 : user.avatar,
-            },
+            username: user === null || user === void 0 ? void 0 : user.username,
+            email: user === null || user === void 0 ? void 0 : user.email,
+            location: user === null || user === void 0 ? void 0 : user.location,
+            birthday: user === null || user === void 0 ? void 0 : user.birthday,
+            phone: user === null || user === void 0 ? void 0 : user.phone,
+            userId: user === null || user === void 0 ? void 0 : user._id,
+            favorite: user === null || user === void 0 ? void 0 : user.favorite,
+            isAdmin: user === null || user === void 0 ? void 0 : user.isAdmin,
+            avatar: user === null || user === void 0 ? void 0 : user.avatar,
         });
     }
 }));

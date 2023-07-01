@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import bcryptjs from "bcryptjs";
 import * as jwt from "jsonwebtoken";
+import fs from 'fs';
 import { nanoid } from "nanoid";
 
 import {
@@ -9,7 +10,7 @@ import {
   sendNodeEmail,
   userAvatar,
 } from "../helpers";
-import { User } from "../models";
+import { Comment, User } from "../models";
 import { UserType } from "../models/userModel";
 import cloudinary from "../helpers/cloudy";
 
@@ -85,8 +86,9 @@ const logout = catchAsync(async (req, res: Response) => {
   if (!user) {
     throw ErrorHandler(401);
   }
-  res.status(204).json({ message: "Deleted successfully" });
+  res.status(204).json({message: "Deleted successfully"});
 });
+
 
 const current = catchAsync(async (req, res: Response) => {
   const { user } = req;
@@ -162,11 +164,26 @@ const updateInfo = catchAsync(async (req, res) => {
     if (!user) {
       throw ErrorHandler(404, "User not found.");
     }
-    return res.status(200).json(user);
+    await Comment.findByIdAndUpdate(userId)
+    console.log('user no file', user);
+    return res.status(200).json({
+        username: user?.username,
+        email: user?.email,
+        location: user?.location,
+        birthday: user?.birthday,
+        phone: user?.phone,
+        userId: user?._id,
+        favorite: user?.favorite,
+        isAdmin: user?.isAdmin,
+        avatar: user?.avatar,
+    });
   } else {
     const userOld = await User.findById(userId);
     if (!userOld) {
       throw ErrorHandler(404, "User not found.");
+    }
+    if (userOld.avatar.id) {
+      await cloudinary.uploader.destroy(userOld.avatar.id)
     }
     const result = await cloudinary.uploader.upload(req.file.path, {
       public_id: `${nanoid()}`,
@@ -175,6 +192,14 @@ const updateInfo = catchAsync(async (req, res) => {
       height: 40,
       crop: 'fill'
     });
+    fs.unlink(req.file.path, (err) => {
+      if (err) {
+        console.log("An error occured while deleting your file");
+        return res.status(404).json("Avatar not found");
+      }
+    });
+
+    console.log("avatar deleted");
     const user = await User.findByIdAndUpdate(
       userId,
       {
@@ -187,24 +212,20 @@ const updateInfo = catchAsync(async (req, res) => {
       },
       { new: true }
     );
+    console.log('upd user', user);
     return res.status(200).json({
-      token,
-      user: {
-        username: user?.username,
-        email: user?.email,
-        location: user?.location,
-        birthday: user?.birthday,
-        phone: user?.phone,
-        userId: user?._id,
-        favorite: user?.favorite,
-        isAdmin: user?.isAdmin,
-        avatar: user?.avatar,
-      },
+      username: user?.username,
+      email: user?.email,
+      location: user?.location,
+      birthday: user?.birthday,
+      phone: user?.phone,
+      userId: user?._id,
+      favorite: user?.favorite,
+      isAdmin: user?.isAdmin,
+      avatar: user?.avatar,
     });
   }
 })
-
-
 
 export default {
   register,

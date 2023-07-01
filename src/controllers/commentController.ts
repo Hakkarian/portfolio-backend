@@ -42,6 +42,7 @@ const updateComment = catchAsync(async (req, res) => {
 });
 
 
+
 const deleteComment = catchAsync(async (req, res) => {
   const { projectId, commentId } = req.params;
   const comment = await Comment.findByIdAndDelete(commentId);
