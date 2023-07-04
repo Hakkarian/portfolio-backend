@@ -1,9 +1,10 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import express, { Application, Response, Request, NextFunction, application } from "express";
+const session = require("express-session");
 import cors from 'cors';
 import mongoose, { ConnectOptions } from 'mongoose';
-import limitter from 'express-rate-limit';
+import passport from 'passport';
 
 import userRouter from './routes/userRoute';
 import projectRouter from './routes/projectRoute';
@@ -17,6 +18,9 @@ const mongoUrl: string = process.env.MONGO_URL || '';
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
+app.use(session({secret: 'SECRET'}))
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(cors());
 
 app.use("/api/users", userRouter);

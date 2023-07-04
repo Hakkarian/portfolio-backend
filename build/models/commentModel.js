@@ -27,7 +27,7 @@ const mongoose_1 = __importStar(require("mongoose"));
 const commentSchema = new mongoose_1.Schema({
     projectId: {
         type: String,
-        required: true
+        required: true,
     },
     content: {
         type: String,
@@ -45,16 +45,22 @@ const commentSchema = new mongoose_1.Schema({
         username: {
             type: String,
         },
-        avatar: {
-            url: {
-                type: String
-            },
-            id: {
-                type: String
-            }
-        },
         email: {
             type: String,
+        },
+        location: {
+            type: String
+        },
+        phone: {
+            type: String
+        },
+        avatar: {
+            url: {
+                type: String,
+            },
+            id: {
+                type: String,
+            },
         },
         userId: {
             type: String,

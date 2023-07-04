@@ -20,24 +20,18 @@ const getAllComments = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0,
 }));
 const addComment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { projectId } = req.params;
-    const { _id, username, email, avatar } = req.user;
+    const { _id, username, email, location, phone, avatar } = req.user;
     const userId = _id;
-    console.log("comment body");
-    console.log('comment body', req.body);
     const { content } = req.body;
     const comment = yield models_1.Comment.create({
         projectId,
         content: content,
-        author: { username, email, avatar, userId },
+        author: { username, email, location, phone, avatar, userId },
     });
-    console.log('add comment', comment);
     res.status(201).json(comment);
 });
 const updateComment = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log('comment upd hello');
     const { projectId, commentId } = req.params;
-    console.log("comment upd commentId", commentId);
-    console.log('comment upd body', req.body);
     const { content } = req.body;
     const comment = yield models_1.Comment.findByIdAndUpdate(commentId, { content }, { new: true });
     const comments = yield models_1.Comment.find({ projectId });

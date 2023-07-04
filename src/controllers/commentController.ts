@@ -16,25 +16,19 @@ const getAllComments = catchAsync(async (req, res) => {
 
 const addComment = async (req: Request, res: Response) => {
   const { projectId } = req.params;
-  const { _id, username, email, avatar } = req.user as UserType;
+  const { _id, username, email, location, phone, avatar } = req.user as UserType;
   const userId = _id;
-  console.log("comment body");
-  console.log('comment body', req.body)
   const { content } = req.body;
   const comment = await Comment.create({
     projectId,
     content: content,
-    author: { username, email, avatar, userId },
+    author: { username, email, location, phone, avatar, userId },
   });
-  console.log('add comment', comment)
     res.status(201).json(comment);
 };
   
 const updateComment = catchAsync(async (req, res) => {
-  console.log('comment upd hello')
   const { projectId, commentId } = req.params;
-  console.log("comment upd commentId", commentId);
-  console.log('comment upd body', req.body);
   const { content } = req.body;
   const comment = await Comment.findByIdAndUpdate(commentId, { content }, { new: true });
   const comments = await Comment.find({projectId});

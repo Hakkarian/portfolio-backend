@@ -8,7 +8,9 @@ interface IComment extends Document {
   author: {
     userId: string,
     username: string,
-    email: string
+    email: string,
+    location: string,
+    phone: string
   };
 }
 
@@ -16,7 +18,7 @@ const commentSchema = new Schema<IComment>(
   {
     projectId: {
       type: String,
-      required: true
+      required: true,
     },
     content: {
       type: String,
@@ -34,16 +36,22 @@ const commentSchema = new Schema<IComment>(
       username: {
         type: String,
       },
-      avatar: {
-        url: {
-          type: String
-        }, 
-        id: {
-          type: String
-        }
-      },
       email: {
         type: String,
+      },
+      location: {
+        type: String
+      },
+      phone: {
+        type: String
+      },
+      avatar: {
+        url: {
+          type: String,
+        },
+        id: {
+          type: String,
+        },
       },
       userId: {
         type: String,

@@ -108,10 +108,11 @@ const current = catchAsync(async (req, res: Response) => {
 });
 
 const google = catchAsync(async (req: Request, res: Response) => {
-  const { _id: userId, email, token, username } = req.user as UserType;
+  const { _id: userId, email, token, username, avatar, location, birthday, phone } = req.user as UserType;
+  console.log('here google', typeof avatar, avatar)
 
   res.redirect(
-    `http://localhost:3000?token=${token}&email=${email}&id=${userId}&username=${username}`
+    `http://localhost:3000?token=${token}&email=${email}&userId=${userId}&username=${username}&url=${avatar.url}&avatarId=${avatar.id}&location=${location}&birthday=${birthday}&phone=${phone}`
   );
 });
 
@@ -164,8 +165,17 @@ const updateInfo = catchAsync(async (req, res) => {
     if (!user) {
       throw ErrorHandler(404, "User not found.");
     }
-    await Comment.findByIdAndUpdate(userId)
-    console.log('user no file', user);
+    const comments = await Comment.updateMany(
+      { "author.userId": userId },
+      {
+        "author.username": username,
+        "author.location": location,
+        "author.email": email,
+        "author.phone": phone,
+      },
+      { new: true }
+    );
+    console.log("updated comments by id without file", comments);
     return res.status(200).json({
         username: user?.username,
         email: user?.email,
@@ -200,6 +210,7 @@ const updateInfo = catchAsync(async (req, res) => {
     });
 
     console.log("avatar deleted");
+    const avatar = { url: result.secure_url, id: result.public_id };
     const user = await User.findByIdAndUpdate(
       userId,
       {
@@ -208,11 +219,23 @@ const updateInfo = catchAsync(async (req, res) => {
         birthday,
         location, 
         phone,
-        avatar: { url: result.secure_url, id: result.public_id },
+        avatar,
       },
       { new: true }
     );
-    console.log('upd user', user);
+    const comments = await Comment.updateMany(
+      { "author.userId": userId },
+      {
+        "author.username": username,
+        "author.location": location,
+        "author.email": email,
+        "author.phone": phone,
+        "author.avatar.url": result.secure_url,
+        "author.avatar.id": result.public_id,
+      },
+      { new: true }
+    );
+    console.log("updated comments by id with file", comments);
     return res.status(200).json({
       username: user?.username,
       email: user?.email,

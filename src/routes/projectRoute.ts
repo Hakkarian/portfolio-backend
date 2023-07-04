@@ -21,5 +21,7 @@ router.delete(
   middlewares.isAdmin,
   projectCtrl.deleteProject
 );
+router.put("/:projectId", middlewares.authenticate, projectCtrl.projectLike);
+router.put("/:projectId", middlewares.authenticate, projectCtrl.projectDislike);
 
 export default router;

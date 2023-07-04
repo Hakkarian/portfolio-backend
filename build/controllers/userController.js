@@ -111,8 +111,9 @@ const current = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0
     res.json({ token, user: { username, email, location, birthday, phone, userId, favorite, isAdmin, avatar } });
 }));
 const google = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { _id: userId, email, token, username } = req.user;
-    res.redirect(`http://localhost:3000?token=${token}&email=${email}&id=${userId}&username=${username}`);
+    const { _id: userId, email, token, username, avatar, location, birthday, phone } = req.user;
+    console.log('here google', typeof avatar, avatar);
+    res.redirect(`http://localhost:3000?token=${token}&email=${email}&userId=${userId}&username=${username}&url=${avatar.url}&avatarId=${avatar.id}&location=${location}&birthday=${birthday}&phone=${phone}`);
 }));
 const verifyEmail = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { verificationToken } = req.params;
@@ -155,8 +156,13 @@ const updateInfo = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, voi
         if (!user) {
             throw (0, helpers_1.ErrorHandler)(404, "User not found.");
         }
-        yield models_1.Comment.findByIdAndUpdate(userId);
-        console.log('user no file', user);
+        const comments = yield models_1.Comment.updateMany({ "author.userId": userId }, {
+            "author.username": username,
+            "author.location": location,
+            "author.email": email,
+            "author.phone": phone,
+        }, { new: true });
+        console.log("updated comments by id without file", comments);
         return res.status(200).json({
             username: user === null || user === void 0 ? void 0 : user.username,
             email: user === null || user === void 0 ? void 0 : user.email,
@@ -191,15 +197,24 @@ const updateInfo = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, voi
             }
         });
         console.log("avatar deleted");
+        const avatar = { url: result.secure_url, id: result.public_id };
         const user = yield models_1.User.findByIdAndUpdate(userId, {
             username,
             email,
             birthday,
             location,
             phone,
-            avatar: { url: result.secure_url, id: result.public_id },
+            avatar,
         }, { new: true });
-        console.log('upd user', user);
+        const comments = yield models_1.Comment.updateMany({ "author.userId": userId }, {
+            "author.username": username,
+            "author.location": location,
+            "author.email": email,
+            "author.phone": phone,
+            "author.avatar.url": result.secure_url,
+            "author.avatar.id": result.public_id,
+        }, { new: true });
+        console.log("updated comments by id with file", comments);
         return res.status(200).json({
             username: user === null || user === void 0 ? void 0 : user.username,
             email: user === null || user === void 0 ? void 0 : user.email,

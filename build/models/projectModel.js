@@ -7,20 +7,26 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const projectSchema = new mongoose_1.default.Schema({
     title: {
         type: String,
-        required: true
+        required: true,
     },
     description: {
         type: String,
-        required: true
+        required: true,
     },
     image: {
         url: String,
-        id: String
+        id: String,
+    },
+    likes: {
+        type: Number,
+    },
+    dislikes: {
+        type: Number,
     },
     createdBy: {
         type: mongoose_1.default.Schema.Types.ObjectId,
-        ref: 'User',
-    }
+        ref: "User",
+    },
 }, { versionKey: false });
 const Project = mongoose_1.default.model('Project', projectSchema);
 exports.default = Project;

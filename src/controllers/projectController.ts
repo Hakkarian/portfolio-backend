@@ -107,4 +107,18 @@ const deleteProject = catchAsync(async (req, res) => {
   res.status(200).json({ message: "Deleted succesfully" });
 });
 
-export default { getAllProjects, addProject, updateProject, deleteProject };
+const projectLike = catchAsync(async (req, res) => {
+  const { projectId } = req.params;
+  const { likes } = req.body;
+
+  const result = await Project.findByIdAndUpdate(projectId, {likes})
+})
+
+const projectDislike = catchAsync(async (req, res) => {
+  const { projectId } = req.params;
+  const { dislikes } = req.body;
+
+  const result = await Project.findByIdAndUpdate(projectId, {dislikes});
+});
+
+export default { getAllProjects, addProject, updateProject, deleteProject, projectLike, projectDislike };

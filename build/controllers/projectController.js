@@ -104,4 +104,14 @@ const deleteProject = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, 
     const result = yield models_1.Project.findByIdAndDelete(projectId);
     res.status(200).json({ message: "Deleted succesfully" });
 }));
-exports.default = { getAllProjects, addProject, updateProject, deleteProject };
+const projectLike = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { projectId } = req.params;
+    const { likes } = req.body;
+    const result = yield models_1.Project.findByIdAndUpdate(projectId, { likes });
+}));
+const projectDislike = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { projectId } = req.params;
+    const { dislikes } = req.body;
+    const result = yield models_1.Project.findByIdAndUpdate(projectId, { dislikes });
+}));
+exports.default = { getAllProjects, addProject, updateProject, deleteProject, projectLike, projectDislike };
