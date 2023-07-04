@@ -4,6 +4,7 @@ import fs from 'fs';
 import { catchAsync, ErrorHandler } from "../helpers";
 import cloudinary from "../helpers/cloudy";
 import { Project } from "../models";
+import { UserType } from "../models/userModel";
 
 const plcholder =
   "https://res.cloudinary.com/dlw7wjlp3/image/upload/v1686575064/placeholder-product_zhkvqu.webp";
@@ -19,7 +20,6 @@ const addProject = async (req: Request, res: Response<any>) => {
     const { title, description } = req.body;
 
     if (!req.file) {
-      console.log('no such photo');
       const project = await Project.create({
         title,
         description,
@@ -36,7 +36,6 @@ const addProject = async (req: Request, res: Response<any>) => {
       description,
       image: { url: result.secure_url, id: result.public_id },
     });
-    console.log(project);
     res.status(200).json(project);
   } catch (error) {
     console.log(error);
@@ -49,7 +48,6 @@ const updateProject = async (req: Request, res: Response, next: NextFunction) =>
     const { title, description } = req.body;
 
     if (!req.file) {
-      console.log("file does not exist");
       const project = await Project.findByIdAndUpdate(
         projectId,
         {
@@ -65,7 +63,6 @@ const updateProject = async (req: Request, res: Response, next: NextFunction) =>
       const projects = await Project.find()
       return res.status(200).json(projects);
     }
-    console.log('file exists')
     const projectOld = await Project.findById(projectId);
     if (!projectOld) {
       throw ErrorHandler(404, "Project not found.");
@@ -94,7 +91,6 @@ const updateProject = async (req: Request, res: Response, next: NextFunction) =>
       { new: true }
     );
     const projects = await Project.find();
-    console.log('projects', projects)
     res.status(200).json(projects);
   } catch (error) {
     next(error)
@@ -109,16 +105,43 @@ const deleteProject = catchAsync(async (req, res) => {
 
 const projectLike = catchAsync(async (req, res) => {
   const { projectId } = req.params;
-  const { likes } = req.body;
+  const { likes, liked } = req.body;
+  const { id } = req.user as UserType;
+  const likedUser = liked.find((item: string) => item === id);
+  if (likedUser) {
+    const filtered = liked.filter((item: string) => item !== id);
+    const result = await Project.findByIdAndUpdate(projectId, { liked: filtered, likes }, { new: true });
+    const projects = await Project.find();
+    return res.status(200).json(projects);
+  }
 
-  const result = await Project.findByIdAndUpdate(projectId, {likes})
+  const result = await Project.findByIdAndUpdate(projectId, { $push: { liked: id }, likes })
+  const projects = await Project.find();
+  res.status(200).json(projects);
 })
 
 const projectDislike = catchAsync(async (req, res) => {
   const { projectId } = req.params;
-  const { dislikes } = req.body;
+  const { dislikes, disliked } = req.body;
+  const { id } = req.user as UserType;
+  const dislikedUser = disliked.find((item: string) => item === id);
+  if (dislikedUser) {
+    const filtered = disliked.filter((item: string) => item !== id);
+    const result = await Project.findByIdAndUpdate(
+      projectId,
+      { disliked: filtered, dislikes },
+      { new: true }
+    );
+    const projects = await Project.find();
+    return res.status(200).json(projects);
+  }
 
-  const result = await Project.findByIdAndUpdate(projectId, {dislikes});
+  const result = await Project.findByIdAndUpdate(projectId, {
+    $push: { disliked: id },
+    dislikes,
+  });
+  const projects = await Project.find();
+  res.status(200).json(projects);
 });
 
 export default { getAllProjects, addProject, updateProject, deleteProject, projectLike, projectDislike };

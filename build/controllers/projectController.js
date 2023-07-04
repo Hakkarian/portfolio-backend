@@ -27,7 +27,6 @@ const addProject = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     try {
         const { title, description } = req.body;
         if (!req.file) {
-            console.log('no such photo');
             const project = yield models_1.Project.create({
                 title,
                 description,
@@ -44,7 +43,6 @@ const addProject = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             description,
             image: { url: result.secure_url, id: result.public_id },
         });
-        console.log(project);
         res.status(200).json(project);
     }
     catch (error) {
@@ -56,7 +54,6 @@ const updateProject = (req, res, next) => __awaiter(void 0, void 0, void 0, func
         const { projectId } = req.params;
         const { title, description } = req.body;
         if (!req.file) {
-            console.log("file does not exist");
             const project = yield models_1.Project.findByIdAndUpdate(projectId, {
                 title,
                 description,
@@ -68,7 +65,6 @@ const updateProject = (req, res, next) => __awaiter(void 0, void 0, void 0, func
             const projects = yield models_1.Project.find();
             return res.status(200).json(projects);
         }
-        console.log('file exists');
         const projectOld = yield models_1.Project.findById(projectId);
         if (!projectOld) {
             throw (0, helpers_1.ErrorHandler)(404, "Project not found.");
@@ -92,7 +88,6 @@ const updateProject = (req, res, next) => __awaiter(void 0, void 0, void 0, func
             image: { url: result.secure_url, id: result.public_id },
         }, { new: true });
         const projects = yield models_1.Project.find();
-        console.log('projects', projects);
         res.status(200).json(projects);
     }
     catch (error) {
@@ -106,12 +101,35 @@ const deleteProject = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, 
 }));
 const projectLike = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { projectId } = req.params;
-    const { likes } = req.body;
-    const result = yield models_1.Project.findByIdAndUpdate(projectId, { likes });
+    const { likes, liked } = req.body;
+    const { id } = req.user;
+    const likedUser = liked.find((item) => item === id);
+    if (likedUser) {
+        const filtered = liked.filter((item) => item !== id);
+        const result = yield models_1.Project.findByIdAndUpdate(projectId, { liked: filtered, likes }, { new: true });
+        const projects = yield models_1.Project.find();
+        return res.status(200).json(projects);
+    }
+    const result = yield models_1.Project.findByIdAndUpdate(projectId, { $push: { liked: id }, likes });
+    const projects = yield models_1.Project.find();
+    res.status(200).json(projects);
 }));
 const projectDislike = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { projectId } = req.params;
-    const { dislikes } = req.body;
-    const result = yield models_1.Project.findByIdAndUpdate(projectId, { dislikes });
+    const { dislikes, disliked } = req.body;
+    const { id } = req.user;
+    const dislikedUser = disliked.find((item) => item === id);
+    if (dislikedUser) {
+        const filtered = disliked.filter((item) => item !== id);
+        const result = yield models_1.Project.findByIdAndUpdate(projectId, { disliked: filtered, dislikes }, { new: true });
+        const projects = yield models_1.Project.find();
+        return res.status(200).json(projects);
+    }
+    const result = yield models_1.Project.findByIdAndUpdate(projectId, {
+        $push: { disliked: id },
+        dislikes,
+    });
+    const projects = yield models_1.Project.find();
+    res.status(200).json(projects);
 }));
 exports.default = { getAllProjects, addProject, updateProject, deleteProject, projectLike, projectDislike };

@@ -12,6 +12,6 @@ router.get("/", controllers_1.projectCtrl.getAllProjects);
 router.post("/", middlewares_1.default.authenticate, multerPhoto_1.upload.single('image'), controllers_1.projectCtrl.addProject);
 router.patch("/:projectId", middlewares_1.default.authenticate, middlewares_1.default.isAdmin, multerPhoto_1.upload.single("image"), controllers_1.projectCtrl.updateProject);
 router.delete("/:projectId", middlewares_1.default.authenticate, middlewares_1.default.isAdmin, controllers_1.projectCtrl.deleteProject);
-router.put("/:projectId", middlewares_1.default.authenticate, controllers_1.projectCtrl.projectLike);
-router.put("/:projectId", middlewares_1.default.authenticate, controllers_1.projectCtrl.projectDislike);
+router.put("/:projectId/like", middlewares_1.default.authenticate, controllers_1.projectCtrl.projectLike);
+router.put("/:projectId/dislike", middlewares_1.default.authenticate, controllers_1.projectCtrl.projectDislike);
 exports.default = router;

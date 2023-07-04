@@ -109,7 +109,6 @@ const current = catchAsync(async (req, res: Response) => {
 
 const google = catchAsync(async (req: Request, res: Response) => {
   const { _id: userId, email, token, username, avatar, location, birthday, phone } = req.user as UserType;
-  console.log('here google', typeof avatar, avatar)
 
   res.redirect(
     `http://localhost:3000?token=${token}&email=${email}&userId=${userId}&username=${username}&url=${avatar.url}&avatarId=${avatar.id}&location=${location}&birthday=${birthday}&phone=${phone}`
@@ -175,7 +174,6 @@ const updateInfo = catchAsync(async (req, res) => {
       },
       { new: true }
     );
-    console.log("updated comments by id without file", comments);
     return res.status(200).json({
         username: user?.username,
         email: user?.email,
@@ -209,7 +207,6 @@ const updateInfo = catchAsync(async (req, res) => {
       }
     });
 
-    console.log("avatar deleted");
     const avatar = { url: result.secure_url, id: result.public_id };
     const user = await User.findByIdAndUpdate(
       userId,
@@ -235,7 +232,6 @@ const updateInfo = catchAsync(async (req, res) => {
       },
       { new: true }
     );
-    console.log("updated comments by id with file", comments);
     return res.status(200).json({
       username: user?.username,
       email: user?.email,

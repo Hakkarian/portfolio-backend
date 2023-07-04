@@ -21,23 +21,28 @@ const authenticate = async (
   next: NextFunction
 ) => {
   const authorization = req.headers.authorization ?? "";
-  console.log('here auth', authorization);
   const secret = process.env.SECRET_KEY;
 
   const [bearer, token] = authorization.split(" ");
   if (bearer !== "Bearer") {
-    console.log("authenticate error bearer");
     next(ErrorHandler(401));
   }
   try {
-    const {userId: id} = jwt.verify(token, secret as string) as JwtPayload;
+    const { id } = jwt.verify(token, secret as string) as JwtPayload;
     if (!id) {
-      console.log('id error')
-      throw ErrorHandler(401);
+      const { userId: id } = jwt.verify(token, secret as string) as JwtPayload;
+      if (!id) {
+        throw ErrorHandler(401);
+      }
+      const user = await User.findById(id);
+      if (!user || !user.token || user.token !== token) {
+        throw ErrorHandler(401);
+      }
+      req.user = user;
+      return next();
     }
     const user = await User.findById(id);
     if (!user || !user.token || user.token !== token) {
-      console.log('authenticate error smth with user')
       throw ErrorHandler(401);
     }
     req.user = user;
@@ -46,8 +51,5 @@ const authenticate = async (
     next(ErrorHandler(401));
   }
 };
-
-
-
 
 export default authenticate;

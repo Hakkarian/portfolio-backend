@@ -27,17 +27,14 @@ const googleParams: StrategyOptionsWithRequest = {
 const googleCallback = async (req: Request, accessToken: string, refreshToken: string, profile: any, done: any) => {
   try {
     const { email, displayName, picture, sub } = profile;
-    console.log('profile', profile);
         const user = await User.findOne({ email });
         if (user) {
           const { _id: userId } = user;
-          console.log('secret', jwtSecret)
             const token = sign({ userId }, jwtSecret as string, {
               expiresIn: "24h",
             });
           user.token = token;
           user.save();
-          console.log('google user', user);
             return done(null, user)
     }
     const password = await bcryptjs.hash(crypto.randomBytes(50).toString('base64'), 10);

@@ -19,10 +19,18 @@ const projectSchema = new mongoose_1.default.Schema({
     },
     likes: {
         type: Number,
+        default: 0,
     },
     dislikes: {
         type: Number,
+        default: 0,
     },
+    liked: [
+        { type: String }
+    ],
+    disliked: [
+        { type: String }
+    ],
     createdBy: {
         type: mongoose_1.default.Schema.Types.ObjectId,
         ref: "User",

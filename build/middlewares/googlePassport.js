@@ -32,17 +32,14 @@ const googleParams = {
 const googleCallback = (req, accessToken, refreshToken, profile, done) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email, displayName, picture, sub } = profile;
-        console.log('profile', profile);
         const user = yield models_1.User.findOne({ email });
         if (user) {
             const { _id: userId } = user;
-            console.log('secret', jwtSecret);
             const token = (0, jsonwebtoken_1.sign)({ userId }, jwtSecret, {
                 expiresIn: "24h",
             });
             user.token = token;
             user.save();
-            console.log('google user', user);
             return done(null, user);
         }
         const password = yield bcryptjs_1.default.hash(crypto_1.default.randomBytes(50).toString('base64'), 10);

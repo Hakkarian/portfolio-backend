@@ -6,6 +6,8 @@ export interface ProjectType extends Document {
   image: { url: string; id: string };
   likes: number;
   dislikes: number;
+  liked: string[];
+  disliked: string[];
   createdBy: mongoose.Schema.Types.ObjectId;
 }
 
@@ -25,10 +27,18 @@ const projectSchema = new mongoose.Schema<ProjectType>(
     },
     likes: {
       type: Number,
+      default: 0,
     },
     dislikes: {
       type: Number,
+      default: 0,
     },
+    liked: [
+      { type: String }
+    ],
+    disliked: [
+      { type: String }
+    ],
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
