@@ -188,12 +188,8 @@ const updateInfo = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, voi
             height: 40,
             crop: 'fill'
         });
-        fs_1.default.unlink(req.file.path, (err) => {
-            if (err) {
-                console.log("An error occured while deleting your file");
-                return res.status(404).json("Avatar not found");
-            }
-        });
+        console.log(req.file.path);
+        fs_1.default.unlink(req.file.path, (error) => console.log(error));
         const avatar = { url: result.secure_url, id: result.public_id };
         const user = yield models_1.User.findByIdAndUpdate(userId, {
             username,

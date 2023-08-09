@@ -20,8 +20,24 @@ const models_1 = require("../models");
 const plcholder = "https://res.cloudinary.com/dlw7wjlp3/image/upload/v1686575064/placeholder-product_zhkvqu.webp";
 const plcId = "fghksdju374gdfhg";
 const getAllProjects = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const projects = yield models_1.Project.find();
-    res.status(200).json(projects);
+    const result = yield models_1.Project.find();
+    res.status(200).json(result);
+}));
+const getPaginatedProjects = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { page, limit } = req.query;
+    const pageNumber = Number(page) || 1;
+    const pageLimit = Number(limit) || 1;
+    const projects = yield models_1.Project.find().skip((pageNumber - 1) * pageLimit).limit(pageLimit);
+    const totalProjects = yield models_1.Project.countDocuments();
+    res.status(200).json({ projects, currentPage: pageNumber, totalPages: Math.ceil(totalProjects / pageLimit) });
+}));
+const getLikedProjects = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { page, limit } = req.query;
+    const { id } = req.user;
+    const pageNumber = Number(page || 1);
+    const pageLimit = Number(limit || 1);
+    const favorite = yield models_1.Project.find({ liked: { $in: [id] } }).skip((pageNumber - 1) * pageLimit);
+    res.status(200).json({ favorite, currentPage: pageNumber, totalPages: Math.ceil(favorite.length / pageLimit) });
 }));
 const addProject = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -43,6 +59,7 @@ const addProject = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             description,
             image: { url: result.secure_url, id: result.public_id },
         });
+        fs_1.default.unlink(req.file.path, (err) => console.log(err));
         res.status(200).json(project);
     }
     catch (error) {
@@ -76,12 +93,7 @@ const updateProject = (req, res, next) => __awaiter(void 0, void 0, void 0, func
             public_id: `${(0, nanoid_1.nanoid)()}`,
             folder: "products",
         });
-        fs_1.default.unlink(req.file.path, (err) => {
-            if (err) {
-                console.log('An error occured while deleting your file');
-                return res.status(404).json({ message: 'File does not exist' });
-            }
-        });
+        fs_1.default.unlink(req.file.path, (err) => console.log(err));
         const project = yield models_1.Project.findByIdAndUpdate(projectId, {
             title,
             description,
@@ -96,8 +108,20 @@ const updateProject = (req, res, next) => __awaiter(void 0, void 0, void 0, func
 });
 const deleteProject = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { projectId } = req.params;
+    const project = yield models_1.Project.findById(projectId);
+    if (!project) {
+        throw (0, helpers_1.ErrorHandler)(404, "Project not found.");
+    }
+    if (project.image.id) {
+        yield cloudy_1.default.uploader.destroy(project.image.id);
+    }
     const result = yield models_1.Project.findByIdAndDelete(projectId);
     res.status(200).json({ message: "Deleted succesfully" });
+}));
+const deleteLikedProject = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { projectId } = req.params;
+    const { id } = req.user;
+    const project = yield models_1.Project.findOne({ _id: projectId, liked: { $in: [id] } });
 }));
 const projectLike = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { projectId } = req.params;
@@ -132,4 +156,4 @@ const projectDislike = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0,
     const projects = yield models_1.Project.find();
     res.status(200).json(projects);
 }));
-exports.default = { getAllProjects, addProject, updateProject, deleteProject, projectLike, projectDislike };
+exports.default = { getAllProjects, getPaginatedProjects, getLikedProjects, addProject, updateProject, deleteProject, projectLike, projectDislike };

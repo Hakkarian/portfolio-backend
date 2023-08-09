@@ -200,12 +200,8 @@ const updateInfo = catchAsync(async (req, res) => {
       height: 40,
       crop: 'fill'
     });
-    fs.unlink(req.file.path, (err) => {
-      if (err) {
-        console.log("An error occured while deleting your file");
-        return res.status(404).json("Avatar not found");
-      }
-    });
+    console.log(req.file.path)
+    fs.unlink(req.file.path, (error) => console.log(error));
 
     const avatar = { url: result.secure_url, id: result.public_id };
     const user = await User.findByIdAndUpdate(

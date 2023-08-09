@@ -26,6 +26,7 @@ const addComment = async (req: Request, res: Response) => {
   });
     res.status(201).json(comment);
 };
+
   
 const updateComment = catchAsync(async (req, res) => {
   const { projectId, commentId } = req.params;

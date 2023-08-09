@@ -6,14 +6,40 @@ import cloudinary from "../helpers/cloudy";
 import { Project } from "../models";
 import { UserType } from "../models/userModel";
 
+interface IQuery {
+  page: number,
+  limit: number
+}
+
+
 const plcholder =
   "https://res.cloudinary.com/dlw7wjlp3/image/upload/v1686575064/placeholder-product_zhkvqu.webp";
 const plcId = "fghksdju374gdfhg";
 
 const getAllProjects = catchAsync(async (req, res) => {
-  const projects = await Project.find();
-  res.status(200).json(projects);
-});
+  const result = await Project.find()
+  res.status(200).json(result);
+})
+const getPaginatedProjects = catchAsync(async (req, res) => {
+  const { page, limit } = req.query;
+  const pageNumber = Number(page) || 1;
+  const pageLimit = Number(limit) || 1;
+
+  const projects = await Project.find().skip((pageNumber - 1) * pageLimit).limit(pageLimit);
+  const totalProjects = await Project.countDocuments();
+  res.status(200).json({projects, currentPage: pageNumber, totalPages: Math.ceil(totalProjects / pageLimit)})
+})
+
+const getLikedProjects = catchAsync(async (req, res) => {
+  const { page, limit } = req.query;
+  const { id } = req.user as UserType;
+  const pageNumber = Number(page || 1);
+  const pageLimit = Number(limit || 1);
+
+  const favorite = await Project.find({ liked: { $in: [id] } }).skip((pageNumber - 1) * pageLimit);
+
+  res.status(200).json({favorite, currentPage: pageNumber, totalPages: Math.ceil(favorite.length / pageLimit)});
+})
 
 const addProject = async (req: Request, res: Response<any>) => {
   try {
@@ -36,6 +62,9 @@ const addProject = async (req: Request, res: Response<any>) => {
       description,
       image: { url: result.secure_url, id: result.public_id },
     });
+
+    fs.unlink(req.file.path, (err) => console.log(err));
+
     res.status(200).json(project);
   } catch (error) {
     console.log(error);
@@ -74,12 +103,7 @@ const updateProject = async (req: Request, res: Response, next: NextFunction) =>
       public_id: `${nanoid()}`,
       folder: "products",
     });
-    fs.unlink(req.file.path, (err) => {
-      if (err) {
-        console.log('An error occured while deleting your file');
-        return res.status(404).json({message: 'File does not exist'})
-      }
-    })
+    fs.unlink(req.file.path, (err) => console.log(err))
     
     const project = await Project.findByIdAndUpdate(
       projectId,
@@ -99,9 +123,23 @@ const updateProject = async (req: Request, res: Response, next: NextFunction) =>
 
 const deleteProject = catchAsync(async (req, res) => {
   const { projectId } = req.params;
+  const project = await Project.findById(projectId);
+  if (!project) {
+    throw ErrorHandler(404, "Project not found.");
+  }
+  if (project.image.id) {
+    await cloudinary.uploader.destroy(project.image.id);
+  }
   const result = await Project.findByIdAndDelete(projectId);
+
   res.status(200).json({ message: "Deleted succesfully" });
 });
+
+const deleteLikedProject = catchAsync(async (req, res) => {
+  const { projectId } = req.params;
+  const { id } = req.user as UserType;
+  const project = await Project.findOne({_id: projectId, liked: { $in: [id] }});
+})
 
 const projectLike = catchAsync(async (req, res) => {
   const { projectId } = req.params;
@@ -144,4 +182,4 @@ const projectDislike = catchAsync(async (req, res) => {
   res.status(200).json(projects);
 });
 
-export default { getAllProjects, addProject, updateProject, deleteProject, projectLike, projectDislike };
+export default { getAllProjects, getPaginatedProjects, getLikedProjects, addProject, updateProject, deleteProject, projectLike, projectDislike };
