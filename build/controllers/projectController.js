@@ -118,42 +118,51 @@ const deleteProject = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, 
     const result = yield models_1.Project.findByIdAndDelete(projectId);
     res.status(200).json({ message: "Deleted succesfully" });
 }));
-const deleteLikedProject = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { projectId } = req.params;
-    const { id } = req.user;
-    const project = yield models_1.Project.findOne({ _id: projectId, liked: { $in: [id] } });
-}));
 const projectLike = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { projectId } = req.params;
+    const { page, limit } = req.query;
     const { likes, liked } = req.body;
     const { id } = req.user;
     const likedUser = liked.find((item) => item === id);
+    const pageNumber = Number(page || 1);
+    const pageLimit = Number(limit || 1);
     if (likedUser) {
         const filtered = liked.filter((item) => item !== id);
         const result = yield models_1.Project.findByIdAndUpdate(projectId, { liked: filtered, likes }, { new: true });
-        const projects = yield models_1.Project.find();
+        const projects = yield models_1.Project.find()
+            .skip((pageNumber - 1) * pageLimit)
+            .limit(pageLimit);
         return res.status(200).json(projects);
     }
     const result = yield models_1.Project.findByIdAndUpdate(projectId, { $push: { liked: id }, likes });
-    const projects = yield models_1.Project.find();
+    const projects = yield models_1.Project.find()
+        .skip((pageNumber - 1) * pageLimit)
+        .limit(pageLimit);
     res.status(200).json(projects);
 }));
 const projectDislike = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { projectId } = req.params;
+    const { page, limit } = req.query;
     const { dislikes, disliked } = req.body;
     const { id } = req.user;
     const dislikedUser = disliked.find((item) => item === id);
+    const pageNumber = Number(page || 1);
+    const pageLimit = Number(limit || 1);
     if (dislikedUser) {
         const filtered = disliked.filter((item) => item !== id);
         const result = yield models_1.Project.findByIdAndUpdate(projectId, { disliked: filtered, dislikes }, { new: true });
-        const projects = yield models_1.Project.find();
+        const projects = yield models_1.Project.find()
+            .skip((pageNumber - 1) * pageLimit)
+            .limit(pageLimit);
         return res.status(200).json(projects);
     }
     const result = yield models_1.Project.findByIdAndUpdate(projectId, {
         $push: { disliked: id },
         dislikes,
     });
-    const projects = yield models_1.Project.find();
+    const projects = yield models_1.Project.find()
+        .skip((pageNumber - 1) * pageLimit)
+        .limit(pageLimit);
     res.status(200).json(projects);
 }));
 exports.default = { getAllProjects, getPaginatedProjects, getLikedProjects, addProject, updateProject, deleteProject, projectLike, projectDislike };

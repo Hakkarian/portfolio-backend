@@ -135,34 +135,42 @@ const deleteProject = catchAsync(async (req, res) => {
   res.status(200).json({ message: "Deleted succesfully" });
 });
 
-const deleteLikedProject = catchAsync(async (req, res) => {
-  const { projectId } = req.params;
-  const { id } = req.user as UserType;
-  const project = await Project.findOne({_id: projectId, liked: { $in: [id] }});
-})
-
 const projectLike = catchAsync(async (req, res) => {
   const { projectId } = req.params;
+  const { page, limit } = req.query;
   const { likes, liked } = req.body;
   const { id } = req.user as UserType;
   const likedUser = liked.find((item: string) => item === id);
+
+  const pageNumber = Number(page || 1);
+  const pageLimit = Number(limit || 1);
+
   if (likedUser) {
     const filtered = liked.filter((item: string) => item !== id);
     const result = await Project.findByIdAndUpdate(projectId, { liked: filtered, likes }, { new: true });
-    const projects = await Project.find();
+    const projects = await Project.find()
+      .skip((pageNumber - 1) * pageLimit)
+      .limit(pageLimit);
     return res.status(200).json(projects);
   }
 
   const result = await Project.findByIdAndUpdate(projectId, { $push: { liked: id }, likes })
-  const projects = await Project.find();
+  const projects = await Project.find()
+    .skip((pageNumber - 1) * pageLimit)
+    .limit(pageLimit);
   res.status(200).json(projects);
 })
 
 const projectDislike = catchAsync(async (req, res) => {
   const { projectId } = req.params;
+  const { page, limit } = req.query;
   const { dislikes, disliked } = req.body;
   const { id } = req.user as UserType;
   const dislikedUser = disliked.find((item: string) => item === id);
+
+  const pageNumber = Number(page || 1);
+  const pageLimit = Number(limit || 1);
+
   if (dislikedUser) {
     const filtered = disliked.filter((item: string) => item !== id);
     const result = await Project.findByIdAndUpdate(
@@ -170,7 +178,10 @@ const projectDislike = catchAsync(async (req, res) => {
       { disliked: filtered, dislikes },
       { new: true }
     );
-    const projects = await Project.find();
+      
+    const projects = await Project.find()
+      .skip((pageNumber - 1) * pageLimit)
+      .limit(pageLimit);
     return res.status(200).json(projects);
   }
 
@@ -178,7 +189,9 @@ const projectDislike = catchAsync(async (req, res) => {
     $push: { disliked: id },
     dislikes,
   });
-  const projects = await Project.find();
+  const projects = await Project.find()
+    .skip((pageNumber - 1) * pageLimit)
+    .limit(pageLimit);
   res.status(200).json(projects);
 });
 
