@@ -28,7 +28,8 @@ const getPaginatedProjects = (0, helpers_1.catchAsync)((req, res) => __awaiter(v
     const pageNumber = Number(page) || 1;
     const pageLimit = Number(limit) || 1;
     const projects = yield models_1.Project.find().skip((pageNumber - 1) * pageLimit).limit(pageLimit);
-    const totalProjects = yield models_1.Project.countDocuments();
+    const totalProjects = yield models_1.Project.find().count();
+    console.log('common', totalProjects);
     res.status(200).json({ projects, currentPage: pageNumber, totalPages: Math.ceil(totalProjects / pageLimit) });
 }));
 const getLikedProjects = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -36,8 +37,10 @@ const getLikedProjects = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 
     const { id } = req.user;
     const pageNumber = Number(page || 1);
     const pageLimit = Number(limit || 1);
-    const favorite = yield models_1.Project.find({ liked: { $in: [id] } }).skip((pageNumber - 1) * pageLimit);
-    res.status(200).json({ favorite, currentPage: pageNumber, totalPages: Math.ceil(favorite.length / pageLimit) });
+    const favorite = yield models_1.Project.find({ liked: { $in: [id] } }).skip((pageNumber - 1) * pageLimit).limit(pageLimit);
+    const totalProjects = yield models_1.Project.find({ liked: { $in: [id] } }).count();
+    console.log('liked', totalProjects);
+    res.status(200).json({ favorite, currentLikedPage: pageNumber, totalPages: Math.ceil(totalProjects / pageLimit) });
 }));
 const addProject = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
