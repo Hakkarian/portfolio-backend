@@ -27,6 +27,7 @@ const getPaginatedProjects = catchAsync(async (req, res) => {
 
   const projects = await Project.find().skip((pageNumber - 1) * pageLimit).limit(pageLimit);
   const totalProjects = await Project.find().count();
+  console.log("total pr", Math.ceil(totalProjects / pageLimit));
 
   console.log('common', totalProjects);
   res.status(200).json({projects, currentPage: pageNumber, totalPages: Math.ceil(totalProjects / pageLimit)})
@@ -40,11 +41,11 @@ const getLikedProjects = catchAsync(async (req, res) => {
 
   const favorite = await Project.find({ liked: { $in: [id] } }).skip((pageNumber - 1) * pageLimit).limit(pageLimit);
 
-  const totalProjects = await Project.find({ liked: { $in: [id] } }).count();
+  const totalLikedProjects = await Project.find({ liked: { $in: [id] } }).count();
 
-  console.log('liked', totalProjects);
+  console.log('liked', totalLikedProjects);
 
-  res.status(200).json({favorite, currentLikedPage: pageNumber, totalPages: Math.ceil(totalProjects / pageLimit)});
+  res.status(200).json({favorite, currentLikedPage: pageNumber, totalLikedPages: Math.ceil(totalLikedProjects / pageLimit)});
 })
 
 const addProject = async (req: Request, res: Response<any>) => {
