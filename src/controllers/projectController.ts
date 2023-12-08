@@ -27,9 +27,7 @@ const getPaginatedProjects = catchAsync(async (req, res) => {
 
   const projects = await Project.find().skip((pageNumber - 1) * pageLimit).limit(pageLimit);
   const totalProjects = await Project.find().count();
-  console.log("total pr", Math.ceil(totalProjects / pageLimit));
 
-  console.log('common', totalProjects);
   res.status(200).json({projects, currentPage: pageNumber, totalPages: Math.ceil(totalProjects / pageLimit)})
 })
 

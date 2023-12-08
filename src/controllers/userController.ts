@@ -22,6 +22,7 @@ const register = catchAsync(async (req: Request, res: Response) => {
   const salt = 10;
   const hashedPassword = await bcryptjs.hash(req.body.password, salt);
 
+  
   const avatar = userAvatar(email);
 
   const verificationToken = nanoid();
@@ -56,7 +57,7 @@ const login = catchAsync(async (req: Request, res: Response) => {
   const payload = {
     id: user?._id,
   };
-  const token = jwt.sign(payload, SECRET_KEY as string, { expiresIn: "23h" });
+  const token = jwt.sign(payload, SECRET_KEY as string, { expiresIn: "5d" });
 
   user.token = token;
 

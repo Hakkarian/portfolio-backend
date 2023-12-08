@@ -10,6 +10,6 @@ export {
   sendNodeEmail,
   registerLimitter,
   loginLimitter,
-  userAvatar,
+  userAvatar
 };
 

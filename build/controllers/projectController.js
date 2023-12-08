@@ -29,8 +29,6 @@ const getPaginatedProjects = (0, helpers_1.catchAsync)((req, res) => __awaiter(v
     const pageLimit = Number(limit) || 1;
     const projects = yield models_1.Project.find().skip((pageNumber - 1) * pageLimit).limit(pageLimit);
     const totalProjects = yield models_1.Project.find().count();
-    console.log("total pr", Math.ceil(totalProjects / pageLimit));
-    console.log('common', totalProjects);
     res.status(200).json({ projects, currentPage: pageNumber, totalPages: Math.ceil(totalProjects / pageLimit) });
 }));
 const getLikedProjects = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {

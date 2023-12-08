@@ -77,7 +77,7 @@ const login = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, 
     const payload = {
         id: user === null || user === void 0 ? void 0 : user._id,
     };
-    const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "23h" });
+    const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "5d" });
     user.token = token;
     user.save();
     res
