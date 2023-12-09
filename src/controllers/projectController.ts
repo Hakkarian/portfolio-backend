@@ -1,51 +1,88 @@
+// *commentController interacts straight with database, specifically for comments
+//
 import { NextFunction, Request, Response } from "express";
 import { nanoid } from "nanoid";
-import fs from 'fs';
+import fs from "fs";
 import { catchAsync, ErrorHandler } from "../helpers";
+// *import cloudinary to handle photos in database
 import cloudinary from "../helpers/cloudy";
 import { Project } from "../models";
 import { UserType } from "../models/userModel";
 
+// *for pagination
 interface IQuery {
-  page: number,
-  limit: number
+  page: number;
+  limit: number;
 }
 
-
+// *placeholder for photos
 const plcholder =
   "https://res.cloudinary.com/dlw7wjlp3/image/upload/v1686575064/placeholder-product_zhkvqu.webp";
 const plcId = "fghksdju374gdfhg";
 
+// find all projects
 const getAllProjects = catchAsync(async (req, res) => {
-  const result = await Project.find()
+  const result = await Project.find();
   res.status(200).json(result);
-})
+});
+
+// find all paginated projects
 const getPaginatedProjects = catchAsync(async (req, res) => {
+  // *page starts for first page, limit is to determine how many elements are possible per one page
   const { page, limit } = req.query;
+  // if page is undefined, start from first
   const pageNumber = Number(page) || 1;
+  // if limit is undefined, then only 1 element per page is our limitation
   const pageLimit = Number(limit) || 1;
 
-  const projects = await Project.find().skip((pageNumber - 1) * pageLimit).limit(pageLimit);
+  // find all projects. then skip pages lesser than current page. For instance, if we have 5 pages with 50 elements each
+  // and we want to go to the "4" page, then SKIP 3 pages and 150 elements overall.
+  // after skipping, restrict chosen page to have no more than fixed number of elements
+  const projects = await Project.find()
+    .skip((pageNumber - 1) * pageLimit)
+    .limit(pageLimit);
   const totalProjects = await Project.find().count();
 
-  res.status(200).json({projects, currentPage: pageNumber, totalPages: Math.ceil(totalProjects / pageLimit)})
-})
+  // display in .json format
+  res.status(200).json({
+    projects,
+    currentPage: pageNumber,
+    totalPages: Math.ceil(totalProjects / pageLimit),
+  });
+});
 
+// every user has an array of favorite projects. Find the id of this user, page number and page limit as described before
+// then find this favorite collection of elements by the user id, along with the length of this collection
+// the display in .json format a collection of favorites by every user, current page and liked elements,
+// divided by the total limit of the page
 const getLikedProjects = catchAsync(async (req, res) => {
   const { page, limit } = req.query;
   const { id } = req.user as UserType;
   const pageNumber = Number(page || 1);
   const pageLimit = Number(limit || 1);
 
-  const favorite = await Project.find({ liked: { $in: [id] } }).skip((pageNumber - 1) * pageLimit).limit(pageLimit);
+  const favorite = await Project.find({ liked: { $in: [id] } })
+    .skip((pageNumber - 1) * pageLimit)
+    .limit(pageLimit);
 
-  const totalLikedProjects = await Project.find({ liked: { $in: [id] } }).count();
+  const totalLikedProjects = await Project.find({
+    liked: { $in: [id] },
+  }).count();
 
-  console.log('liked', totalLikedProjects);
+  console.log("liked", totalLikedProjects);
 
-  res.status(200).json({favorite, currentLikedPage: pageNumber, totalLikedPages: Math.ceil(totalLikedProjects / pageLimit)});
-})
+  res.status(200).json({
+    favorite,
+    currentLikedPage: pageNumber,
+    totalLikedPages: Math.ceil(totalLikedProjects / pageLimit),
+  });
+});
 
+// *admin feature
+// add project with option of adding with photo or without. If without, display placeholder of a photo instead
+// if with the photo, upload it to the cloudinary
+// then retrieve the information about uploaded photo, and paste this info to the "image" field
+// and delete the old photo from the cloudinary
 const addProject = async (req: Request, res: Response<any>) => {
   try {
     const { title, description } = req.body;
@@ -76,7 +113,11 @@ const addProject = async (req: Request, res: Response<any>) => {
   }
 };
 
-const updateProject = async (req: Request, res: Response, next: NextFunction) => {
+const updateProject = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { projectId } = req.params;
     const { title, description } = req.body;
@@ -94,7 +135,7 @@ const updateProject = async (req: Request, res: Response, next: NextFunction) =>
       if (!project) {
         throw ErrorHandler(404, "Project not found.");
       }
-      const projects = await Project.find()
+      const projects = await Project.find();
       return res.status(200).json(projects);
     }
     const projectOld = await Project.findById(projectId);
@@ -108,8 +149,8 @@ const updateProject = async (req: Request, res: Response, next: NextFunction) =>
       public_id: `${nanoid()}`,
       folder: "products",
     });
-    fs.unlink(req.file.path, (err) => console.log(err))
-    
+    fs.unlink(req.file.path, (err) => console.log(err));
+
     const project = await Project.findByIdAndUpdate(
       projectId,
       {
@@ -122,7 +163,7 @@ const updateProject = async (req: Request, res: Response, next: NextFunction) =>
     const projects = await Project.find();
     res.status(200).json(projects);
   } catch (error) {
-    next(error)
+    next(error);
   }
 };
 
@@ -152,19 +193,26 @@ const projectLike = catchAsync(async (req, res) => {
 
   if (likedUser) {
     const filtered = liked.filter((item: string) => item !== id);
-    const result = await Project.findByIdAndUpdate(projectId, { liked: filtered, likes }, { new: true });
+    const result = await Project.findByIdAndUpdate(
+      projectId,
+      { liked: filtered, likes },
+      { new: true }
+    );
     const projects = await Project.find()
       .skip((pageNumber - 1) * pageLimit)
       .limit(pageLimit);
     return res.status(200).json(projects);
   }
 
-  const result = await Project.findByIdAndUpdate(projectId, { $push: { liked: id }, likes })
+  const result = await Project.findByIdAndUpdate(projectId, {
+    $push: { liked: id },
+    likes,
+  });
   const projects = await Project.find()
     .skip((pageNumber - 1) * pageLimit)
     .limit(pageLimit);
   res.status(200).json(projects);
-})
+});
 
 const projectDislike = catchAsync(async (req, res) => {
   const { projectId } = req.params;
@@ -183,7 +231,7 @@ const projectDislike = catchAsync(async (req, res) => {
       { disliked: filtered, dislikes },
       { new: true }
     );
-      
+
     const projects = await Project.find()
       .skip((pageNumber - 1) * pageLimit)
       .limit(pageLimit);
@@ -200,4 +248,13 @@ const projectDislike = catchAsync(async (req, res) => {
   res.status(200).json(projects);
 });
 
-export default { getAllProjects, getPaginatedProjects, getLikedProjects, addProject, updateProject, deleteProject, projectLike, projectDislike };
+export default {
+  getAllProjects,
+  getPaginatedProjects,
+  getLikedProjects,
+  addProject,
+  updateProject,
+  deleteProject,
+  projectLike,
+  projectDislike,
+};
