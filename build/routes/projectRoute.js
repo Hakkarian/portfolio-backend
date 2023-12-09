@@ -8,6 +8,7 @@ const middlewares_1 = __importDefault(require("../middlewares"));
 const controllers_1 = require("../controllers");
 const multerPhoto_1 = require("../helpers/multerPhoto");
 const router = express_1.default.Router();
+// paths for dealing with projects: addition, deletion, full and partial update
 router.get("/all", controllers_1.projectCtrl.getAllProjects);
 router.get("/", controllers_1.projectCtrl.getPaginatedProjects);
 router.get("/liked", middlewares_1.default.authenticate, controllers_1.projectCtrl.getLikedProjects);

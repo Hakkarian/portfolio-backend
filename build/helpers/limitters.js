@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loginLimitter = exports.registerLimitter = void 0;
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
+// restricts to perform only a limited amount of auth requests
 exports.registerLimitter = (0, express_rate_limit_1.default)({
     windowMs: 1 * 60 * 1000,
     max: 2,

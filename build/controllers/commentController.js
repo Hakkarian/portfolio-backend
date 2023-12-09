@@ -9,15 +9,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+// *just a wrapper for try&catch block
 const helpers_1 = require("../helpers");
 // import { AuthenticatedRequest } from "../middlewares/authenticate";
+// *model for a comment
 const models_1 = require("../models");
+// import { AuthenticatedRequest } from "../middlewares/authenticate";
 // import { UserType } from "../models/userModel";
+// *find all comments by id of the project of the project list
 const getAllComments = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { projectId } = req.params;
     const comments = yield models_1.Comment.find({ projectId });
     res.status(200).json(comments);
 }));
+// *add comment  by id of the project of the project list
 const addComment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { projectId } = req.params;
     const { _id, username, email, location, phone, avatar } = req.user;
@@ -30,6 +35,7 @@ const addComment = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     });
     res.status(201).json(comment);
 });
+// *update comment by its own id and id of the project of the project list
 const updateComment = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { projectId, commentId } = req.params;
     const { content } = req.body;
@@ -37,6 +43,7 @@ const updateComment = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, 
     const comments = yield models_1.Comment.find({ projectId });
     res.status(200).json(comments);
 }));
+// *delete comment by its own id and id of the project of the project list
 const deleteComment = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { projectId, commentId } = req.params;
     const comment = yield models_1.Comment.findByIdAndDelete(commentId);

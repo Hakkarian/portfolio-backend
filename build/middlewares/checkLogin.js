@@ -12,6 +12,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const helpers_1 = require("../helpers");
 const models_1 = require("../models");
 const schemas_1 = require("../schemas");
+// check if login is syntactically correct
+// if yes, find the user with such login
+// if the user doesn't exist, throw an error
+// else paste to the body and continue
 const checkLogin = (0, helpers_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { error, value } = (0, schemas_1.loginValidation)(req.body);
     if (error) {
@@ -24,7 +28,6 @@ const checkLogin = (0, helpers_1.catchAsync)((req, res, next) => __awaiter(void 
     if (!user) {
         next((0, helpers_1.ErrorHandler)(401));
     }
-    // const correctPassword = await user.checkPassword(value.password, user.password)
     req.body = value;
     next();
 }));

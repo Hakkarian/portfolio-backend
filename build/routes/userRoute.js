@@ -10,6 +10,7 @@ const googlePassport_1 = __importDefault(require("../middlewares/googlePassport"
 const helpers_1 = require("../helpers");
 const multerPhoto_1 = require("../helpers/multerPhoto");
 const router = express_1.default.Router();
+// paths for authentication
 router.get("/google/callback", googlePassport_1.default.authenticate("google", { scope: ["email", "profile"] }), userController_1.default.google);
 router.get("/current", middlewares_1.default.authenticate, userController_1.default.current);
 router.get("/verify/:verificationToken", userController_1.default.verifyEmail);

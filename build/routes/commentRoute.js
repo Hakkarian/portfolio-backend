@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const controllers_1 = require("../controllers");
 const middlewares_1 = __importDefault(require("../middlewares"));
 const router = express_1.default.Router();
+// paths for dealing with comments: fetching, addition, deletion, partial update
 router.get('/:projectId/comments', controllers_1.commentCtrl.getAllComments);
 router.post("/:projectId/comments", middlewares_1.default.authenticate, controllers_1.commentCtrl.addComment);
 router.patch("/:projectId/comments/:commentId", middlewares_1.default.authenticate, controllers_1.commentCtrl.updateComment);

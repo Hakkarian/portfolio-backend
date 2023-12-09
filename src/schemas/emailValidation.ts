@@ -1,6 +1,8 @@
 import Joi from "joi"
 import { emailRegex } from "../regex"
 
+// check if email's blueprint is correct
+
 const emailValidation = (data: any) => {
     const schema = Joi.object({
       email: Joi.string().regex(emailRegex).email().required().messages({

@@ -12,6 +12,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const helpers_1 = require("../helpers");
 const models_1 = require("../models");
 const schemas_1 = require("../schemas");
+// check if email is syntactically correct
+// if yes, find the user with such email
+// if the user doesn't exist, throw an error
+// else paste to the body and continue
 const checkEmail = (0, helpers_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { error, value } = (0, schemas_1.emailValidation)(req.body);
     if (error) {

@@ -2,6 +2,11 @@ import { catchAsync, ErrorHandler } from "../helpers";
 import { User } from "../models";
 import { loginValidation } from "../schemas";
 
+// check if login is syntactically correct
+// if yes, find the user with such login
+// if the user doesn't exist, throw an error
+// else paste to the body and continue
+
 const checkLogin = catchAsync(async (req, res, next) => {
   const { error, value } = loginValidation(req.body);
   if (error) {
@@ -15,7 +20,6 @@ const checkLogin = catchAsync(async (req, res, next) => {
     next(ErrorHandler(401));
   }
 
-  // const correctPassword = await user.checkPassword(value.password, user.password)
   req.body = value;
   next();
 });

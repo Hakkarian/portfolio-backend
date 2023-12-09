@@ -16,6 +16,7 @@ import cloudinary from "../helpers/cloudy";
 
 const baseUrl = process.env.BASE_URL;
 
+// create a user with default avatar and credentials
 const register = catchAsync(async (req: Request, res: Response) => {
   const { email } = req.body;
   // hashed password
@@ -26,6 +27,7 @@ const register = catchAsync(async (req: Request, res: Response) => {
   const avatar = userAvatar(email);
 
   const verificationToken = nanoid();
+
   // Create a new user
   const user = await User.create({
     username: req.body.username,
@@ -37,17 +39,19 @@ const register = catchAsync(async (req: Request, res: Response) => {
     password: hashedPassword,
   });
 
-   const verifyEmail = {
-     to: req.body.email,
-     subject: "Verify email",
-     html: `<a target="_blank" href="${baseUrl}/users/verify/${user.verificationToken}">Click me to verify email</a>`,
-   };
+  // verify email upon creation
+  const verifyEmail = {
+    to: req.body.email,
+    subject: "Verify email",
+    html: `<a target="_blank" href="${baseUrl}/users/verify/${user.verificationToken}">Click me to verify email</a>`,
+  };
 
-   await sendNodeEmail(verifyEmail);
+  await sendNodeEmail(verifyEmail);
 
   res.status(200).json(user);
 });
 
+// user must login after registration. If such user is not present, throw an error, save them to database, and add them a token
 const login = catchAsync(async (req: Request, res: Response) => {
   const user = await User.findOne({ email: req.body.email });
   if (!user) {
@@ -81,6 +85,7 @@ const login = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+// on logout user's token is removed from database.
 const logout = catchAsync(async (req, res: Response) => {
   const { _id } = req.user as UserType;
   const user = await User.findByIdAndUpdate(_id, { token: "" });
@@ -90,7 +95,7 @@ const logout = catchAsync(async (req, res: Response) => {
   res.status(204).json({message: "Deleted successfully"});
 });
 
-
+// user will be constantly saved between reloads
 const current = catchAsync(async (req, res: Response) => {
   const { user } = req;
   const {
@@ -108,6 +113,7 @@ const current = catchAsync(async (req, res: Response) => {
   res.json({ token, user: { username, email, location, birthday, phone, userId, favorite, isAdmin, avatar } });
 });
 
+// google authentication. All credentials were passed via the link
 const google = catchAsync(async (req: Request, res: Response) => {
   const { _id: userId, email, token, username, avatar, location, birthday, phone } = req.user as UserType;
 
@@ -116,6 +122,8 @@ const google = catchAsync(async (req: Request, res: Response) => {
   );
 });
 
+// find a user ith verification Token. If such isn't there, throw an error
+// else succesfully verified
 const verifyEmail = catchAsync(async (req, res: Response) => {
   const { verificationToken } = req.params;
   const user = await User.findOne({ verificationToken });
@@ -130,6 +138,8 @@ const verifyEmail = catchAsync(async (req, res: Response) => {
   res.status(200).json({ message: "Verification successful" });
 });
 
+// if somehow user is not able to see email verification, it is repeated
+// if user is already verified, throw an error
 const repeatVerifyEmail = catchAsync(async (req, res) => {
   const { email } = req.body;
   const baseUrl = process.env.BASE_URL;
@@ -154,6 +164,7 @@ const repeatVerifyEmail = catchAsync(async (req, res) => {
   res.json({ message: "Email verification success" });
 });
 
+// update the information about user, his credentials and photo
 const updateInfo = catchAsync(async (req, res) => {
   const { userId } = req.params;
   const { avatar, token } = req.user as UserType;
@@ -165,7 +176,8 @@ const updateInfo = catchAsync(async (req, res) => {
     if (!user) {
       throw ErrorHandler(404, "User not found.");
     }
-    const comments = await Comment.updateMany(
+    // updates not only user's credentials, but also information inside of the comment
+    await Comment.updateMany(
       { "author.userId": userId },
       {
         "author.username": username,
@@ -199,7 +211,8 @@ const updateInfo = catchAsync(async (req, res) => {
       folder: "users",
       width: 40,
       height: 40,
-      crop: 'fill'
+      crop: 'fill',
+      gravity: 'auto'
     });
     console.log(req.file.path)
     fs.unlink(req.file.path, (error) => console.log(error));
@@ -217,7 +230,8 @@ const updateInfo = catchAsync(async (req, res) => {
       },
       { new: true }
     );
-    const comments = await Comment.updateMany(
+    // updates with avatar
+    await Comment.updateMany(
       { "author.userId": userId },
       {
         "author.username": username,

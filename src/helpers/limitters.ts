@@ -1,5 +1,7 @@
 import limitter from 'express-rate-limit';
 
+// restricts to perform only a limited amount of auth requests
+
 export const registerLimitter = limitter({
   windowMs: 1 * 60 * 1000,
   max: 2,

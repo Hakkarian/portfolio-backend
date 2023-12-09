@@ -1,4 +1,5 @@
 "use strict";
+// regular expressions, fundamental parts of validation
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.phoneRegex = exports.locationRegex = exports.birthdayRegex = exports.passwordRegex = exports.emailRegex = exports.nameRegex = void 0;
 exports.nameRegex = /^[a-zA-Z0-9_]{4,16}$/;

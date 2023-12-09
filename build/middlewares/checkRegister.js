@@ -12,6 +12,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const helpers_1 = require("../helpers");
 const models_1 = require("../models");
 const schemas_1 = require("../schemas");
+// check if registration is correct, if not - throw an error
+// if it is, check if email already exists, if not - throw an error
+// if it is, pass the info to the body and continue
 const checkRegister = (0, helpers_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { error, value } = (0, schemas_1.registerValidation)(req.body);
     if (error) {

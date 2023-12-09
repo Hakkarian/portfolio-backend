@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const joi_1 = __importDefault(require("joi"));
 const regex_1 = require("../regex");
-const userValidation = () => {
+const userValidation = (data) => {
     const schema = joi_1.default.object({
         username: joi_1.default.string()
             .regex(regex_1.nameRegex)
@@ -35,4 +35,6 @@ const userValidation = () => {
             "string.pattern.base": `Number must match the format +380XXXXXXXXX or 0XXXXXXXXX`,
         }),
     });
+    return schema.validate(data);
 };
+exports.default = userValidation;

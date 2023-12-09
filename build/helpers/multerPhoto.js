@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.upload = void 0;
 const multer_1 = __importDefault(require("multer"));
 const nanoid_1 = require("nanoid");
+// stores the photo in the selected path, add to the name of the photo an id
 const storage = multer_1.default.diskStorage({
     destination: (req, file, cb) => {
         cb(null, "src/images");

@@ -1,7 +1,18 @@
 import Joi from "joi"
 import { birthdayRegex, emailRegex, locationRegex, nameRegex, phoneRegex } from "../regex";
 
-const userValidation = () => {
+
+// check if user's credentials are correctly written
+
+interface IUser {
+  username: string,
+  email: string,
+  birthday: string,
+  location: string,
+  phone: string
+}
+
+const userValidation = (data: IUser) => {
     const schema = Joi.object({
       username: Joi.string()
         .regex(nameRegex)
@@ -31,4 +42,7 @@ const userValidation = () => {
         "string.pattern.base": `Number must match the format +380XXXXXXXXX or 0XXXXXXXXX`,
       }),
     });
+  return schema.validate(data);
 }
+
+export default userValidation;

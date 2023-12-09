@@ -113,6 +113,9 @@ const addProject = async (req: Request, res: Response<any>) => {
   }
 };
 
+// update project by using existing project id
+// if photo is not there, update only text
+// if photo is there, save it to the cloudinary, and delete the old photo
 const updateProject = async (
   req: Request,
   res: Response,
@@ -130,6 +133,7 @@ const updateProject = async (
           description,
           image: { url: plcholder, id: "" },
         },
+        // to display new .json format, not old one
         { new: true }
       );
       if (!project) {
@@ -139,6 +143,8 @@ const updateProject = async (
       return res.status(200).json(projects);
     }
     const projectOld = await Project.findById(projectId);
+    // remove the project by its own id
+    // if there is no such an id, throw an error
     if (!projectOld) {
       throw ErrorHandler(404, "Project not found.");
     }
@@ -151,15 +157,6 @@ const updateProject = async (
     });
     fs.unlink(req.file.path, (err) => console.log(err));
 
-    const project = await Project.findByIdAndUpdate(
-      projectId,
-      {
-        title,
-        description,
-        image: { url: result.secure_url, id: result.public_id },
-      },
-      { new: true }
-    );
     const projects = await Project.find();
     res.status(200).json(projects);
   } catch (error) {
@@ -167,6 +164,7 @@ const updateProject = async (
   }
 };
 
+// remove project by its own id
 const deleteProject = catchAsync(async (req, res) => {
   const { projectId } = req.params;
   const project = await Project.findById(projectId);
@@ -181,6 +179,10 @@ const deleteProject = catchAsync(async (req, res) => {
   res.status(200).json({ message: "Deleted succesfully" });
 });
 
+// check if user liked the project
+// if it is, remove the liked project from an array of liked projects, and return the list of projects
+// if not, add to the liked array, and return the list of projects
+// it goes similarly with dislike functionality
 const projectLike = catchAsync(async (req, res) => {
   const { projectId } = req.params;
   const { page, limit } = req.query;
@@ -193,7 +195,7 @@ const projectLike = catchAsync(async (req, res) => {
 
   if (likedUser) {
     const filtered = liked.filter((item: string) => item !== id);
-    const result = await Project.findByIdAndUpdate(
+    await Project.findByIdAndUpdate(
       projectId,
       { liked: filtered, likes },
       { new: true }
@@ -204,7 +206,7 @@ const projectLike = catchAsync(async (req, res) => {
     return res.status(200).json(projects);
   }
 
-  const result = await Project.findByIdAndUpdate(projectId, {
+  await Project.findByIdAndUpdate(projectId, {
     $push: { liked: id },
     likes,
   });
@@ -226,7 +228,7 @@ const projectDislike = catchAsync(async (req, res) => {
 
   if (dislikedUser) {
     const filtered = disliked.filter((item: string) => item !== id);
-    const result = await Project.findByIdAndUpdate(
+    await Project.findByIdAndUpdate(
       projectId,
       { disliked: filtered, dislikes },
       { new: true }
@@ -238,7 +240,7 @@ const projectDislike = catchAsync(async (req, res) => {
     return res.status(200).json(projects);
   }
 
-  const result = await Project.findByIdAndUpdate(projectId, {
+  await Project.findByIdAndUpdate(projectId, {
     $push: { disliked: id },
     dislikes,
   });

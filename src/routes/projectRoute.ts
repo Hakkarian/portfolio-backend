@@ -6,6 +6,8 @@ import { upload } from '../helpers/multerPhoto';
 
 const router = express.Router();
 
+// paths for dealing with projects: addition, deletion, full and partial update
+
 router.get("/all", projectCtrl.getAllProjects);
 router.get("/", projectCtrl.getPaginatedProjects)
 router.get("/liked", middlewares.authenticate, projectCtrl.getLikedProjects);

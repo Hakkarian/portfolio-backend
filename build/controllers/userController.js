@@ -43,6 +43,7 @@ const helpers_1 = require("../helpers");
 const models_1 = require("../models");
 const cloudy_1 = __importDefault(require("../helpers/cloudy"));
 const baseUrl = process.env.BASE_URL;
+// create a user with default avatar and credentials
 const register = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email } = req.body;
     // hashed password
@@ -60,6 +61,7 @@ const register = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 
         avatar: { url: avatar, id: "" },
         password: hashedPassword,
     });
+    // verify email upon creation
     const verifyEmail = {
         to: req.body.email,
         subject: "Verify email",
@@ -68,6 +70,7 @@ const register = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 
     yield (0, helpers_1.sendNodeEmail)(verifyEmail);
     res.status(200).json(user);
 }));
+// user must login after registration. If such user is not present, throw an error, save them to database, and add them a token
 const login = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield models_1.User.findOne({ email: req.body.email });
     if (!user) {
@@ -97,6 +100,7 @@ const login = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, 
         },
     });
 }));
+// on logout user's token is removed from database.
 const logout = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { _id } = req.user;
     const user = yield models_1.User.findByIdAndUpdate(_id, { token: "" });
@@ -105,15 +109,19 @@ const logout = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0,
     }
     res.status(204).json({ message: "Deleted successfully" });
 }));
+// user will be constantly saved between reloads
 const current = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { user } = req;
     const { token, username, email, location, birthday, phone, favorite, isAdmin, avatar, _id: userId, } = user;
     res.json({ token, user: { username, email, location, birthday, phone, userId, favorite, isAdmin, avatar } });
 }));
+// google authentication. All credentials were passed via the link
 const google = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { _id: userId, email, token, username, avatar, location, birthday, phone } = req.user;
     res.redirect(`http://localhost:3000?token=${token}&email=${email}&userId=${userId}&username=${username}&url=${avatar.url}&avatarId=${avatar.id}&location=${location}&birthday=${birthday}&phone=${phone}`);
 }));
+// find a user ith verification Token. If such isn't there, throw an error
+// else succesfully verified
 const verifyEmail = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { verificationToken } = req.params;
     const user = yield models_1.User.findOne({ verificationToken });
@@ -126,6 +134,8 @@ const verifyEmail = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, vo
     });
     res.status(200).json({ message: "Verification successful" });
 }));
+// if somehow user is not able to see email verification, it is repeated
+// if user is already verified, throw an error
 const repeatVerifyEmail = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email } = req.body;
     const baseUrl = process.env.BASE_URL;
@@ -144,6 +154,7 @@ const repeatVerifyEmail = (0, helpers_1.catchAsync)((req, res) => __awaiter(void
     yield (0, helpers_1.sendNodeEmail)(verifyEmail);
     res.json({ message: "Email verification success" });
 }));
+// update the information about user, his credentials and photo
 const updateInfo = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { userId } = req.params;
     const { avatar, token } = req.user;
@@ -155,7 +166,8 @@ const updateInfo = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, voi
         if (!user) {
             throw (0, helpers_1.ErrorHandler)(404, "User not found.");
         }
-        const comments = yield models_1.Comment.updateMany({ "author.userId": userId }, {
+        // updates not only user's credentials, but also information inside of the comment
+        yield models_1.Comment.updateMany({ "author.userId": userId }, {
             "author.username": username,
             "author.location": location,
             "author.email": email,
@@ -186,7 +198,8 @@ const updateInfo = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, voi
             folder: "users",
             width: 40,
             height: 40,
-            crop: 'fill'
+            crop: 'fill',
+            gravity: 'auto'
         });
         console.log(req.file.path);
         fs_1.default.unlink(req.file.path, (error) => console.log(error));
@@ -199,7 +212,8 @@ const updateInfo = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, voi
             phone,
             avatar,
         }, { new: true });
-        const comments = yield models_1.Comment.updateMany({ "author.userId": userId }, {
+        // updates with avatar
+        yield models_1.Comment.updateMany({ "author.userId": userId }, {
             "author.username": username,
             "author.location": location,
             "author.email": email,

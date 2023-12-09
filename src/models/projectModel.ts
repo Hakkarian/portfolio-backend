@@ -1,3 +1,5 @@
+//project's blueprint
+
 import mongoose from "mongoose";
 
 export interface ProjectType extends Document {

@@ -6,6 +6,8 @@ interface User {
   password: string;
 }
 
+// check if email and password align with the standard
+
 const loginValidation = (data: User) => {
   const schema = Joi.object({
     email: Joi.string().regex(emailRegex).email().required().messages({

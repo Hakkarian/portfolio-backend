@@ -2,6 +2,11 @@ import { catchAsync, ErrorHandler } from "../helpers";
 import { User } from "../models";
 import { emailValidation } from "../schemas";
 
+// check if email is syntactically correct
+// if yes, find the user with such email
+// if the user doesn't exist, throw an error
+// else paste to the body and continue
+
 const checkEmail = catchAsync(async (req, res, next) => {
   const { error, value } = emailValidation(req.body);
 

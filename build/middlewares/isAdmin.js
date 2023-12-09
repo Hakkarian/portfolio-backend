@@ -10,6 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const helpers_1 = require("../helpers");
+// check if user is admin
+// if it is, continue, else throw an error
 const isAdmin = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { isAdmin } = req.user;

@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+// surrounds the function by try&catch block in order to handle possible errors
 const catchAsync = (func) => (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         return func(req, res, next);

@@ -7,6 +7,8 @@ interface User {
     password: string
 }
 
+// check to see if the user is written taking into account rules, described below
+
 const registerValidation = (data: User) => {
     const schema = Joi.object({
       username: Joi.string()

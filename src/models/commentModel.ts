@@ -1,4 +1,6 @@
-import mongoose, { Schema, Types} from "mongoose";
+// comment's blueprint
+
+import mongoose, { Schema, Types } from "mongoose";
 
 interface IComment extends Document {
   projectId: string;

@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.userAvatar = void 0;
 const crypto_1 = __importDefault(require("crypto"));
 const gravatar_1 = __importDefault(require("gravatar"));
+// creates randomized hex avatar
 const userAvatar = (data) => {
     const md5Hash = crypto_1.default.createHash('md5').update(data.trim().toLowerCase()).digest('hex');
     return gravatar_1.default.url(md5Hash, { s: '40', r: 'pg', d: 'identicon' });

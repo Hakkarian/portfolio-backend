@@ -1,5 +1,4 @@
 import express from "express";
-import limitter from 'express-rate-limit';
 import userController from "../controllers/userController";
 import middlewares from "../middlewares";
 import googlePassport from '../middlewares/googlePassport';
@@ -7,6 +6,8 @@ import { loginLimitter, registerLimitter } from "../helpers";
 import { upload } from "../helpers/multerPhoto";
 
 const router = express.Router();
+
+// paths for authentication
 
 router.get(
   "/google/callback",

@@ -1,7 +1,6 @@
 // *user schema to satisfy typescript's demand
 
 import mongoose, { Document, Schema, Types } from "mongoose";
-import bcryptjs from 'bcryptjs';
 
 export interface UserType extends Document {
   _id: string,

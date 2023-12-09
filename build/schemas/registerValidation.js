@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const joi_1 = __importDefault(require("joi"));
 const regex_1 = require("../regex");
+// check to see if the user is written taking into account rules, described below
 const registerValidation = (data) => {
     const schema = joi_1.default.object({
         username: joi_1.default.string()
