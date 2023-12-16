@@ -19,7 +19,7 @@ const authenticate = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
     var _a;
     // check for authorization token
     const authorization = (_a = req.headers.authorization) !== null && _a !== void 0 ? _a : "";
-    const secret = process.env.SECRET_KEY;
+    const secret = process.env.JWT_ACCESS_SECRET;
     // split the token into two parts - bearer and token
     const [bearer, token] = authorization.split(" ");
     if (bearer !== "Bearer") {
@@ -28,14 +28,18 @@ const authenticate = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
     try {
         // verify if token is correct
         // if not, throw an error
-        const { userId: id } = jsonwebtoken_1.default.verify(token, secret);
+        const { id } = jsonwebtoken_1.default.verify(token, secret);
         if (!id) {
+            console.log('here id');
             throw (0, helpers_1.ErrorHandler)(401);
         }
+        console.log('id success!');
         // if the token is correct, find user by this id
         // if user undefined, if user's token isn't there or does not equal to token which is passed - throw an error
         const user = yield models_1.User.findById(id);
+        console.log('user right', user);
         if (!user || !user.token || user.token !== token) {
+            console.log('user wrong', user);
             throw (0, helpers_1.ErrorHandler)(401);
         }
         // else user is passed into the slot, continue

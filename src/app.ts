@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 import express, { Application, Response, Request, NextFunction } from "express";
 const session = require("express-session");
+const cookieParser = require('cookie-parser');
 import cors from 'cors';
 import mongoose, { ConnectOptions } from 'mongoose';
 import passport from 'passport';
@@ -20,6 +21,7 @@ const mongoUrl: string = process.env.MONGO_URL || '';
 
 // parses incoming requests with JSON uploads
 app.use(express.json());
+app.use(cookieParser());
 // allows to access the data from the request body using req.body
 app.use(express.urlencoded({ extended: true }));
 // serve static files for production build

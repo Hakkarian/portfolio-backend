@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import bcryptjs from "bcryptjs";
 import * as jwt from "jsonwebtoken";
-import fs from 'fs';
+import fs from "fs";
 import { nanoid } from "nanoid";
 
 import {
@@ -13,6 +13,7 @@ import {
 import { Comment, User } from "../models";
 import { UserType } from "../models/userModel";
 import cloudinary from "../helpers/cloudy";
+import { generateTokens, saveTokens } from "../service/token-service";
 
 const baseUrl = process.env.BASE_URL;
 
@@ -23,7 +24,6 @@ const register = catchAsync(async (req: Request, res: Response) => {
   const salt = 10;
   const hashedPassword = await bcryptjs.hash(req.body.password, salt);
 
-  
   const avatar = userAvatar(email);
 
   const verificationToken = nanoid();
@@ -35,7 +35,7 @@ const register = catchAsync(async (req: Request, res: Response) => {
     birthday: "",
     location: "",
     phone: "",
-    avatar: {url: avatar, id: ""},
+    avatar: { url: avatar, id: "" },
     password: hashedPassword,
   });
 
@@ -54,50 +54,63 @@ const register = catchAsync(async (req: Request, res: Response) => {
 // user must login after registration. If such user is not present, throw an error, save them to database, and add them a token
 const login = catchAsync(async (req: Request, res: Response) => {
   const user = await User.findOne({ email: req.body.email });
+  console.log('login', user)
   if (!user) {
     return res.status(404).json({ message: "Not Found" });
   }
   const { SECRET_KEY } = process.env;
   const payload = {
     id: user?._id,
+    email: user?.email,
+    verify: user?.verify
   };
-  const token = jwt.sign(payload, SECRET_KEY as string, { expiresIn: "5d" });
+  const tokens = generateTokens(payload);
+  await saveTokens(payload.id, tokens.refreshToken);
+  res.cookie("refreshToken", tokens.refreshToken, {
+    maxAge: 15 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    secure: true,
+  });
 
-  user.token = token;
+  console.log('access token', tokens.accessToken)
+
+  user.token = tokens.accessToken;
 
   user.save();
 
-  res
-    .status(200)
-    .json({
-      token,
-      user: {
-        username: user.username,
-        email: user.email,
-        location: user.location,
-        birthday: user.birthday,
-        phone: user.phone,
-        userId: user._id,
-        favorite: user.favorite,
-        isAdmin: user.isAdmin,
-        avatar: user.avatar,
-      },
-    });
+  res.status(200).json({
+    ...tokens,
+    user: {
+      username: user.username,
+      email: user.email,
+      location: user.location,
+      birthday: user.birthday,
+      phone: user.phone,
+      userId: user._id,
+      favorite: user.favorite,
+      isAdmin: user.isAdmin,
+      avatar: user.avatar,
+    },
+  });
 });
 
 // on logout user's token is removed from database.
 const logout = catchAsync(async (req, res: Response) => {
   const { _id } = req.user as UserType;
+  console.log('signes')
+  const { refreshToken } = req.cookies;
+  console.log('other side', refreshToken)
   const user = await User.findByIdAndUpdate(_id, { token: "" });
   if (!user) {
     throw ErrorHandler(401);
   }
-  res.status(204).json({message: "Deleted successfully"});
+  res.status(204).json({ message: "Deleted successfully" });
 });
 
 // user will be constantly saved between reloads
 const current = catchAsync(async (req, res: Response) => {
   const { user } = req;
+  const { refreshToken } = req.cookies;
   const {
     token,
     username,
@@ -110,12 +123,35 @@ const current = catchAsync(async (req, res: Response) => {
     avatar,
     _id: userId,
   } = user as UserType;
-  res.json({ token, user: { username, email, location, birthday, phone, userId, favorite, isAdmin, avatar } });
+  res.cookie('refreshToken', refreshToken, {maxAge: 15 * 24 * 60 * 60 * 1000, httpOnly: true})
+  res.json({
+    token,
+    user: {
+      username,
+      email,
+      location,
+      birthday,
+      phone,
+      userId,
+      favorite,
+      isAdmin,
+      avatar,
+    },
+  });
 });
 
 // google authentication. All credentials were passed via the link
 const google = catchAsync(async (req: Request, res: Response) => {
-  const { _id: userId, email, token, username, avatar, location, birthday, phone } = req.user as UserType;
+  const {
+    _id: userId,
+    email,
+    token,
+    username,
+    avatar,
+    location,
+    birthday,
+    phone,
+  } = req.user as UserType;
 
   res.redirect(
     `http://localhost:3000?token=${token}&email=${email}&userId=${userId}&username=${username}&url=${avatar.url}&avatarId=${avatar.id}&location=${location}&birthday=${birthday}&phone=${phone}`
@@ -151,7 +187,6 @@ const repeatVerifyEmail = catchAsync(async (req, res) => {
   if (user.verify) {
     throw ErrorHandler(400, "Verification has already been passed");
   }
-  
 
   const verifyEmail = {
     to: email,
@@ -170,9 +205,11 @@ const updateInfo = catchAsync(async (req, res) => {
   const { avatar, token } = req.user as UserType;
   const { username, email, location, birthday, phone } = req.body;
   if (!req.file) {
-    const user = await User.findByIdAndUpdate(userId, {username, 
-      email, location, birthday, phone, avatar
-    }, {new: true})
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { username, email, location, birthday, phone, avatar },
+      { new: true }
+    );
     if (!user) {
       throw ErrorHandler(404, "User not found.");
     }
@@ -188,15 +225,15 @@ const updateInfo = catchAsync(async (req, res) => {
       { new: true }
     );
     return res.status(200).json({
-        username: user?.username,
-        email: user?.email,
-        location: user?.location,
-        birthday: user?.birthday,
-        phone: user?.phone,
-        userId: user?._id,
-        favorite: user?.favorite,
-        isAdmin: user?.isAdmin,
-        avatar: user?.avatar,
+      username: user?.username,
+      email: user?.email,
+      location: user?.location,
+      birthday: user?.birthday,
+      phone: user?.phone,
+      userId: user?._id,
+      favorite: user?.favorite,
+      isAdmin: user?.isAdmin,
+      avatar: user?.avatar,
     });
   } else {
     const userOld = await User.findById(userId);
@@ -204,17 +241,17 @@ const updateInfo = catchAsync(async (req, res) => {
       throw ErrorHandler(404, "User not found.");
     }
     if (userOld.avatar.id) {
-      await cloudinary.uploader.destroy(userOld.avatar.id)
+      await cloudinary.uploader.destroy(userOld.avatar.id);
     }
     const result = await cloudinary.uploader.upload(req.file.path, {
       public_id: `${nanoid()}`,
       folder: "users",
       width: 40,
       height: 40,
-      crop: 'fill',
-      gravity: 'auto'
+      crop: "fill",
+      gravity: "auto",
     });
-    console.log(req.file.path)
+    console.log(req.file.path);
     fs.unlink(req.file.path, (error) => console.log(error));
 
     const avatar = { url: result.secure_url, id: result.public_id };
@@ -224,7 +261,7 @@ const updateInfo = catchAsync(async (req, res) => {
         username,
         email,
         birthday,
-        location, 
+        location,
         phone,
         avatar,
       },
@@ -255,7 +292,7 @@ const updateInfo = catchAsync(async (req, res) => {
       avatar: user?.avatar,
     });
   }
-})
+});
 
 export default {
   register,
@@ -265,5 +302,5 @@ export default {
   google,
   verifyEmail,
   repeatVerifyEmail,
-  updateInfo
+  updateInfo,
 };

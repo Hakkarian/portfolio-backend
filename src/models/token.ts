@@ -1,13 +1,13 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 interface IToken extends Document {
-    tokenId: string;
-    userId: string;
+    refreshToken: String;
+    userId: {type: String, ref: String};
 }
 
 const TokenSchema = new Schema<IToken>({
-  tokenId: String,
-  userId: String,
+  refreshToken: String,
+  userId: {type: Schema.Types.ObjectId, ref: "User"},
 });
 
 const Token = mongoose.model<IToken>('Token', TokenSchema)

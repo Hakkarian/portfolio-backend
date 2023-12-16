@@ -8,6 +8,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const express_1 = __importDefault(require("express"));
 const session = require("express-session");
+const cookieParser = require('cookie-parser');
 const cors_1 = __importDefault(require("cors"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const passport_1 = __importDefault(require("passport"));
@@ -21,6 +22,7 @@ const port = process.env.PORT || 5000;
 const mongoUrl = process.env.MONGO_URL || '';
 // parses incoming requests with JSON uploads
 app.use(express_1.default.json());
+app.use(cookieParser());
 // allows to access the data from the request body using req.body
 app.use(express_1.default.urlencoded({ extended: true }));
 // serve static files for production build

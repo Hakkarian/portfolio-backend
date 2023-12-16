@@ -1,27 +1,4 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -36,12 +13,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
-const jwt = __importStar(require("jsonwebtoken"));
 const fs_1 = __importDefault(require("fs"));
 const nanoid_1 = require("nanoid");
 const helpers_1 = require("../helpers");
 const models_1 = require("../models");
 const cloudy_1 = __importDefault(require("../helpers/cloudy"));
+const token_service_1 = require("../service/token-service");
 const baseUrl = process.env.BASE_URL;
 // create a user with default avatar and credentials
 const register = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -73,21 +50,27 @@ const register = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 
 // user must login after registration. If such user is not present, throw an error, save them to database, and add them a token
 const login = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield models_1.User.findOne({ email: req.body.email });
+    console.log('login', user);
     if (!user) {
         return res.status(404).json({ message: "Not Found" });
     }
     const { SECRET_KEY } = process.env;
     const payload = {
         id: user === null || user === void 0 ? void 0 : user._id,
+        email: user === null || user === void 0 ? void 0 : user.email,
+        verify: user === null || user === void 0 ? void 0 : user.verify
     };
-    const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "5d" });
-    user.token = token;
+    const tokens = (0, token_service_1.generateTokens)(payload);
+    yield (0, token_service_1.saveTokens)(payload.id, tokens.refreshToken);
+    res.cookie("refreshToken", tokens.refreshToken, {
+        maxAge: 15 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        secure: true,
+    });
+    console.log('access token', tokens.accessToken);
+    user.token = tokens.accessToken;
     user.save();
-    res
-        .status(200)
-        .json({
-        token,
-        user: {
+    res.status(200).json(Object.assign(Object.assign({}, tokens), { user: {
             username: user.username,
             email: user.email,
             location: user.location,
@@ -97,12 +80,14 @@ const login = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, 
             favorite: user.favorite,
             isAdmin: user.isAdmin,
             avatar: user.avatar,
-        },
-    });
+        } }));
 }));
 // on logout user's token is removed from database.
 const logout = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { _id } = req.user;
+    console.log('signes');
+    const { refreshToken } = req.cookies;
+    console.log('other side', refreshToken);
     const user = yield models_1.User.findByIdAndUpdate(_id, { token: "" });
     if (!user) {
         throw (0, helpers_1.ErrorHandler)(401);
@@ -112,12 +97,27 @@ const logout = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0,
 // user will be constantly saved between reloads
 const current = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { user } = req;
+    const { refreshToken } = req.cookies;
     const { token, username, email, location, birthday, phone, favorite, isAdmin, avatar, _id: userId, } = user;
-    res.json({ token, user: { username, email, location, birthday, phone, userId, favorite, isAdmin, avatar } });
+    res.cookie('refreshToken', refreshToken, { maxAge: 15 * 24 * 60 * 60 * 1000, httpOnly: true });
+    res.json({
+        token,
+        user: {
+            username,
+            email,
+            location,
+            birthday,
+            phone,
+            userId,
+            favorite,
+            isAdmin,
+            avatar,
+        },
+    });
 }));
 // google authentication. All credentials were passed via the link
 const google = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { _id: userId, email, token, username, avatar, location, birthday, phone } = req.user;
+    const { _id: userId, email, token, username, avatar, location, birthday, phone, } = req.user;
     res.redirect(`http://localhost:3000?token=${token}&email=${email}&userId=${userId}&username=${username}&url=${avatar.url}&avatarId=${avatar.id}&location=${location}&birthday=${birthday}&phone=${phone}`);
 }));
 // find a user ith verification Token. If such isn't there, throw an error
@@ -160,9 +160,7 @@ const updateInfo = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, voi
     const { avatar, token } = req.user;
     const { username, email, location, birthday, phone } = req.body;
     if (!req.file) {
-        const user = yield models_1.User.findByIdAndUpdate(userId, { username,
-            email, location, birthday, phone, avatar
-        }, { new: true });
+        const user = yield models_1.User.findByIdAndUpdate(userId, { username, email, location, birthday, phone, avatar }, { new: true });
         if (!user) {
             throw (0, helpers_1.ErrorHandler)(404, "User not found.");
         }
@@ -198,8 +196,8 @@ const updateInfo = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, voi
             folder: "users",
             width: 40,
             height: 40,
-            crop: 'fill',
-            gravity: 'auto'
+            crop: "fill",
+            gravity: "auto",
         });
         console.log(req.file.path);
         fs_1.default.unlink(req.file.path, (error) => console.log(error));
@@ -242,5 +240,5 @@ exports.default = {
     google,
     verifyEmail,
     repeatVerifyEmail,
-    updateInfo
+    updateInfo,
 };
