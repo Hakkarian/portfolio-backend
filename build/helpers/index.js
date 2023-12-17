@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.userAvatar = exports.loginLimitter = exports.registerLimitter = exports.sendNodeEmail = exports.ErrorHandler = exports.catchAsync = void 0;
+exports.validateRefreshToken = exports.validateAccessToken = exports.userAvatar = exports.loginLimitter = exports.registerLimitter = exports.sendNodeEmail = exports.ErrorHandler = exports.catchAsync = void 0;
 const catchAsync_1 = __importDefault(require("./catchAsync"));
 exports.catchAsync = catchAsync_1.default;
 const ErrorHandler_1 = __importDefault(require("./ErrorHandler"));
@@ -15,3 +15,6 @@ Object.defineProperty(exports, "registerLimitter", { enumerable: true, get: func
 Object.defineProperty(exports, "loginLimitter", { enumerable: true, get: function () { return limitters_1.loginLimitter; } });
 const userAvatar_1 = require("./userAvatar");
 Object.defineProperty(exports, "userAvatar", { enumerable: true, get: function () { return userAvatar_1.userAvatar; } });
+const validateTokens_1 = require("./validateTokens");
+Object.defineProperty(exports, "validateAccessToken", { enumerable: true, get: function () { return validateTokens_1.validateAccessToken; } });
+Object.defineProperty(exports, "validateRefreshToken", { enumerable: true, get: function () { return validateTokens_1.validateRefreshToken; } });

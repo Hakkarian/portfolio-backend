@@ -26,7 +26,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const TokenSchema = new mongoose_1.Schema({
     refreshToken: String,
-    userId: { type: mongoose_1.Schema.Types.ObjectId, ref: "User" },
+    user: { type: mongoose_1.Schema.Types.ObjectId, ref: "User" },
 });
 const Token = mongoose_1.default.model('Token', TokenSchema);
 exports.default = Token;

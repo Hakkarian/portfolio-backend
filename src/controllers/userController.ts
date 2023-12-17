@@ -1,8 +1,9 @@
-import { Request, Response } from "express";
+import { Request, response, Response } from "express";
 import bcryptjs from "bcryptjs";
 import * as jwt from "jsonwebtoken";
 import fs from "fs";
 import { nanoid } from "nanoid";
+const cookie = require('cookie');
 
 import {
   catchAsync,
@@ -13,7 +14,11 @@ import {
 import { Comment, User } from "../models";
 import { UserType } from "../models/userModel";
 import cloudinary from "../helpers/cloudy";
-import { generateTokens, saveTokens } from "../service/token-service";
+import {
+  generateTokens,
+  removeToken,
+  saveTokens,
+} from "../service/token-service";
 
 const baseUrl = process.env.BASE_URL;
 
@@ -54,7 +59,9 @@ const register = catchAsync(async (req: Request, res: Response) => {
 // user must login after registration. If such user is not present, throw an error, save them to database, and add them a token
 const login = catchAsync(async (req: Request, res: Response) => {
   const user = await User.findOne({ email: req.body.email });
-  console.log('login', user)
+  const cookieHeader = res.get('Set-Cookie');
+  console.log('set-cookie header')
+  console.log("login", user);
   if (!user) {
     return res.status(404).json({ message: "Not Found" });
   }
@@ -62,17 +69,17 @@ const login = catchAsync(async (req: Request, res: Response) => {
   const payload = {
     id: user?._id,
     email: user?.email,
-    verify: user?.verify
+    verify: user?.verify,
   };
   const tokens = generateTokens(payload);
+  console.log('user id', payload.id);
   await saveTokens(payload.id, tokens.refreshToken);
   res.cookie("refreshToken", tokens.refreshToken, {
     maxAge: 15 * 24 * 60 * 60 * 1000,
     httpOnly: true,
-    secure: true,
   });
 
-  console.log('access token', tokens.accessToken)
+  console.log("access token", tokens.accessToken);
 
   user.token = tokens.accessToken;
 
@@ -96,15 +103,11 @@ const login = catchAsync(async (req: Request, res: Response) => {
 
 // on logout user's token is removed from database.
 const logout = catchAsync(async (req, res: Response) => {
-  const { _id } = req.user as UserType;
-  console.log('signes')
   const { refreshToken } = req.cookies;
-  console.log('other side', refreshToken)
-  const user = await User.findByIdAndUpdate(_id, { token: "" });
-  if (!user) {
-    throw ErrorHandler(401);
-  }
-  res.status(204).json({ message: "Deleted successfully" });
+  const result = removeToken(refreshToken);
+  console.log('result', result);
+  res.clearCookie("refreshToken");
+  res.status(204).json({ message: "Deleted successfully", result});
 });
 
 // user will be constantly saved between reloads
@@ -112,31 +115,18 @@ const current = catchAsync(async (req, res: Response) => {
   const { user } = req;
   const { refreshToken } = req.cookies;
   const {
-    token,
-    username,
     email,
-    location,
-    birthday,
-    phone,
-    favorite,
-    isAdmin,
-    avatar,
+    verify,
     _id: userId,
   } = user as UserType;
-  res.cookie('refreshToken', refreshToken, {maxAge: 15 * 24 * 60 * 60 * 1000, httpOnly: true})
+
+  res.cookie("refreshToken", refreshToken, {
+    maxAge: 15 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+  });
+  console.log('winner')
   res.json({
-    token,
-    user: {
-      username,
-      email,
-      location,
-      birthday,
-      phone,
-      userId,
-      favorite,
-      isAdmin,
-      avatar,
-    },
+    user
   });
 });
 

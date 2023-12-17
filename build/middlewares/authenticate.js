@@ -8,40 +8,29 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const helpers_1 = require("../helpers");
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const models_1 = require("../models");
 const authenticate = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     // check for authorization token
     const authorization = (_a = req.headers.authorization) !== null && _a !== void 0 ? _a : "";
-    const secret = process.env.JWT_ACCESS_SECRET;
     // split the token into two parts - bearer and token
     const [bearer, token] = authorization.split(" ");
     if (bearer !== "Bearer") {
         next((0, helpers_1.ErrorHandler)(401));
     }
     try {
-        // verify if token is correct
-        // if not, throw an error
-        const { id } = jsonwebtoken_1.default.verify(token, secret);
-        if (!id) {
-            console.log('here id');
+        const { refreshToken } = req.cookies;
+        const vfiedRefresh = (0, helpers_1.validateRefreshToken)(refreshToken);
+        if (!vfiedRefresh) {
+            console.log("lest refresh verification is wrong");
             throw (0, helpers_1.ErrorHandler)(401);
         }
-        console.log('id success!');
         // if the token is correct, find user by this id
         // if user undefined, if user's token isn't there or does not equal to token which is passed - throw an error
-        const user = yield models_1.User.findById(id);
-        console.log('user right', user);
-        if (!user || !user.token || user.token !== token) {
-            console.log('user wrong', user);
-            throw (0, helpers_1.ErrorHandler)(401);
-        }
+        const user = yield models_1.User.findById(vfiedRefresh === null || vfiedRefresh === void 0 ? void 0 : vfiedRefresh.id);
+        console.log('refresh user contents', user);
         // else user is passed into the slot, continue
         req.user = user;
         next();

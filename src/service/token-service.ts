@@ -14,11 +14,20 @@ const generateTokens = (payload: any) => {
 const saveTokens = async (userId: string, refreshToken: string) => {
     const tokenData = await Token.findOne({ user: userId });
     if (tokenData) {
+        console.log('fixed! new key', refreshToken)
         tokenData.refreshToken = refreshToken;
         return tokenData.save();
     }
     const token = await Token.create({ user: userId, refreshToken })
+    console.log('save token', token)
     return token;
 };
 
-export {generateTokens, saveTokens}
+const removeToken = async (refreshToken: string) => {
+    console.log('refreshToken', refreshToken)
+    const tokenData = await Token.deleteOne({ refreshToken });
+    console.log('after delete', tokenData)
+    return tokenData;
+}
+
+export {generateTokens, saveTokens, removeToken}

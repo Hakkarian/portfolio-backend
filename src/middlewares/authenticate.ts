@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction, RequestHandler } from "express";
-import { catchAsync, ErrorHandler } from "../helpers";
+import { catchAsync, ErrorHandler, validateRefreshToken } from "../helpers";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { User } from "../models";
 import { UserType } from "../models/userModel";
@@ -19,7 +19,6 @@ const authenticate = async (
 ) => {
   // check for authorization token
   const authorization = req.headers.authorization ?? "";
-  const secret = process.env.JWT_ACCESS_SECRET;
 
   // split the token into two parts - bearer and token
   const [bearer, token] = authorization.split(" ");
@@ -27,25 +26,18 @@ const authenticate = async (
     next(ErrorHandler(401));
   }
   try {
-    // verify if token is correct
-    // if not, throw an error
-    const {id} = jwt.verify(token, secret as string) as JwtPayload;
-    if (!id) {
-      console.log('here id')
+    const { refreshToken } = req.cookies;
+    const vfiedRefresh = validateRefreshToken(refreshToken);
+    if (!vfiedRefresh) {
+      console.log("lest refresh verification is wrong");
       throw ErrorHandler(401);
     }
-
-    console.log('id success!')
     // if the token is correct, find user by this id
     // if user undefined, if user's token isn't there or does not equal to token which is passed - throw an error
-    const user = await User.findById(id);
-    console.log('user right', user);
-    if (!user || !user.token || user.token !== token) {
-      console.log('user wrong', user)
-      throw ErrorHandler(401);
-    }
+    const user = await User.findById((vfiedRefresh as JwtPayload)?.id);
+    console.log('refresh user contents', user);
     // else user is passed into the slot, continue
-    req.user = user;
+    req.user = user!;
     next();
   } catch (error) {
     next(ErrorHandler(401));

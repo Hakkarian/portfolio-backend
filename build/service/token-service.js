@@ -32,7 +32,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.saveTokens = exports.generateTokens = void 0;
+exports.removeToken = exports.saveTokens = exports.generateTokens = void 0;
 const jwt = __importStar(require("jsonwebtoken"));
 const models_1 = require("../models");
 const secret = process.env.JWT_ACCESS_SECRET;
@@ -46,10 +46,19 @@ exports.generateTokens = generateTokens;
 const saveTokens = (userId, refreshToken) => __awaiter(void 0, void 0, void 0, function* () {
     const tokenData = yield models_1.Token.findOne({ user: userId });
     if (tokenData) {
+        console.log('fixed! new key', refreshToken);
         tokenData.refreshToken = refreshToken;
         return tokenData.save();
     }
     const token = yield models_1.Token.create({ user: userId, refreshToken });
+    console.log('save token', token);
     return token;
 });
 exports.saveTokens = saveTokens;
+const removeToken = (refreshToken) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log('refreshToken', refreshToken);
+    const tokenData = yield models_1.Token.deleteOne({ refreshToken });
+    console.log('after delete', tokenData);
+    return tokenData;
+});
+exports.removeToken = removeToken;

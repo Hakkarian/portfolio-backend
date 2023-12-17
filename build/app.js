@@ -17,12 +17,12 @@ const projectRoute_1 = __importDefault(require("./routes/projectRoute"));
 const commentRoute_1 = __importDefault(require("./routes/commentRoute"));
 // creating an application
 const app = (0, express_1.default)();
+app.use(cookieParser());
 // determine that port will equal to placeholder value, alogn with mongo key
 const port = process.env.PORT || 5000;
 const mongoUrl = process.env.MONGO_URL || '';
 // parses incoming requests with JSON uploads
 app.use(express_1.default.json());
-app.use(cookieParser());
 // allows to access the data from the request body using req.body
 app.use(express_1.default.urlencoded({ extended: true }));
 // serve static files for production build

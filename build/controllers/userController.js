@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const fs_1 = __importDefault(require("fs"));
 const nanoid_1 = require("nanoid");
+const cookie = require('cookie');
 const helpers_1 = require("../helpers");
 const models_1 = require("../models");
 const cloudy_1 = __importDefault(require("../helpers/cloudy"));
@@ -50,7 +51,9 @@ const register = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 
 // user must login after registration. If such user is not present, throw an error, save them to database, and add them a token
 const login = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield models_1.User.findOne({ email: req.body.email });
-    console.log('login', user);
+    const cookieHeader = res.get('Set-Cookie');
+    console.log('set-cookie header');
+    console.log("login", user);
     if (!user) {
         return res.status(404).json({ message: "Not Found" });
     }
@@ -58,16 +61,16 @@ const login = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, 
     const payload = {
         id: user === null || user === void 0 ? void 0 : user._id,
         email: user === null || user === void 0 ? void 0 : user.email,
-        verify: user === null || user === void 0 ? void 0 : user.verify
+        verify: user === null || user === void 0 ? void 0 : user.verify,
     };
     const tokens = (0, token_service_1.generateTokens)(payload);
+    console.log('user id', payload.id);
     yield (0, token_service_1.saveTokens)(payload.id, tokens.refreshToken);
     res.cookie("refreshToken", tokens.refreshToken, {
         maxAge: 15 * 24 * 60 * 60 * 1000,
         httpOnly: true,
-        secure: true,
     });
-    console.log('access token', tokens.accessToken);
+    console.log("access token", tokens.accessToken);
     user.token = tokens.accessToken;
     user.save();
     res.status(200).json(Object.assign(Object.assign({}, tokens), { user: {
@@ -84,35 +87,24 @@ const login = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, 
 }));
 // on logout user's token is removed from database.
 const logout = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { _id } = req.user;
-    console.log('signes');
     const { refreshToken } = req.cookies;
-    console.log('other side', refreshToken);
-    const user = yield models_1.User.findByIdAndUpdate(_id, { token: "" });
-    if (!user) {
-        throw (0, helpers_1.ErrorHandler)(401);
-    }
-    res.status(204).json({ message: "Deleted successfully" });
+    const result = (0, token_service_1.removeToken)(refreshToken);
+    console.log('result', result);
+    res.clearCookie("refreshToken");
+    res.status(204).json({ message: "Deleted successfully", result });
 }));
 // user will be constantly saved between reloads
 const current = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { user } = req;
     const { refreshToken } = req.cookies;
-    const { token, username, email, location, birthday, phone, favorite, isAdmin, avatar, _id: userId, } = user;
-    res.cookie('refreshToken', refreshToken, { maxAge: 15 * 24 * 60 * 60 * 1000, httpOnly: true });
+    const { email, verify, _id: userId, } = user;
+    res.cookie("refreshToken", refreshToken, {
+        maxAge: 15 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+    });
+    console.log('winner');
     res.json({
-        token,
-        user: {
-            username,
-            email,
-            location,
-            birthday,
-            phone,
-            userId,
-            favorite,
-            isAdmin,
-            avatar,
-        },
+        user
     });
 }));
 // google authentication. All credentials were passed via the link
