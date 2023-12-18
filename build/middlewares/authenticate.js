@@ -24,7 +24,7 @@ const authenticate = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
         const { refreshToken } = req.cookies;
         const vfiedRefresh = (0, helpers_1.validateRefreshToken)(refreshToken);
         if (!vfiedRefresh) {
-            console.log("lest refresh verification is wrong");
+            console.log("last refresh verification is wrong");
             throw (0, helpers_1.ErrorHandler)(401);
         }
         // if the token is correct, find user by this id
@@ -33,6 +33,7 @@ const authenticate = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
         console.log('refresh user contents', user);
         // else user is passed into the slot, continue
         req.user = user;
+        console.log('deus ex machina');
         next();
     }
     catch (error) {

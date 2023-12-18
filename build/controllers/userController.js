@@ -100,7 +100,6 @@ const current = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0
     const { email, verify, _id: userId, } = user;
     res.cookie("refreshToken", refreshToken, {
         maxAge: 15 * 24 * 60 * 60 * 1000,
-        httpOnly: true,
     });
     console.log('winner');
     res.json({

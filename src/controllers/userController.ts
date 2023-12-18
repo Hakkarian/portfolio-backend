@@ -10,6 +10,7 @@ import {
   ErrorHandler,
   sendNodeEmail,
   userAvatar,
+  validateRefreshToken,
 } from "../helpers";
 import { Comment, User } from "../models";
 import { UserType } from "../models/userModel";
@@ -120,9 +121,10 @@ const current = catchAsync(async (req, res: Response) => {
     _id: userId,
   } = user as UserType;
 
+
+
   res.cookie("refreshToken", refreshToken, {
     maxAge: 15 * 24 * 60 * 60 * 1000,
-    httpOnly: true,
   });
   console.log('winner')
   res.json({
