@@ -15,7 +15,6 @@ import commentRouter from './routes/commentRoute';
 
 // creating an application
 const app: Application = express();
-app.use(cookieParser());
 
 // determine that port will equal to placeholder value, alogn with mongo key
 const port = process.env.PORT || 5000;
@@ -33,6 +32,7 @@ app.use(session({ secret: 'SECRET' }))
 app.use(passport.initialize());
 // enables persistent login sessions
 app.use(passport.session());
+app.use(cookieParser());
 // enables requests from different origins to access home API
 app.use(cors());
 

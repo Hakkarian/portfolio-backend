@@ -17,7 +17,6 @@ const projectRoute_1 = __importDefault(require("./routes/projectRoute"));
 const commentRoute_1 = __importDefault(require("./routes/commentRoute"));
 // creating an application
 const app = (0, express_1.default)();
-app.use(cookieParser());
 // determine that port will equal to placeholder value, alogn with mongo key
 const port = process.env.PORT || 5000;
 const mongoUrl = process.env.MONGO_URL || '';
@@ -33,6 +32,7 @@ app.use(session({ secret: 'SECRET' }));
 app.use(passport_1.default.initialize());
 // enables persistent login sessions
 app.use(passport_1.default.session());
+app.use(cookieParser());
 // enables requests from different origins to access home API
 app.use((0, cors_1.default)());
 // main routes for users, projects and comments
