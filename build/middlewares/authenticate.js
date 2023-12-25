@@ -22,6 +22,7 @@ const authenticate = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
     }
     try {
         const { refreshToken } = req.cookies;
+        console.log('ahahahaha', req.cookies);
         const vfiedRefresh = (0, helpers_1.validateRefreshToken)(refreshToken);
         if (!vfiedRefresh) {
             console.log("last refresh verification is wrong");

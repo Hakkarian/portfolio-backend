@@ -27,6 +27,7 @@ const authenticate = async (
   }
   try {
     const { refreshToken } = req.cookies;
+    console.log('ahahahaha', req.cookies)
     const vfiedRefresh = validateRefreshToken(refreshToken);
     if (!vfiedRefresh) {
       console.log("last refresh verification is wrong");

@@ -57,7 +57,6 @@ const login = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, 
     if (!user) {
         return res.status(404).json({ message: "Not Found" });
     }
-    const { SECRET_KEY } = process.env;
     const payload = {
         id: user === null || user === void 0 ? void 0 : user._id,
         email: user === null || user === void 0 ? void 0 : user.email,
@@ -65,11 +64,11 @@ const login = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, 
     };
     const tokens = (0, token_service_1.generateTokens)(payload);
     console.log('user id', payload.id);
-    yield (0, token_service_1.saveTokens)(payload.id, tokens.refreshToken);
     res.cookie("refreshToken", tokens.refreshToken, {
         maxAge: 15 * 24 * 60 * 60 * 1000,
         httpOnly: true,
     });
+    yield (0, token_service_1.saveTokens)(payload.id, tokens.refreshToken);
     console.log("access token", tokens.accessToken);
     user.token = tokens.accessToken;
     user.save();
@@ -91,18 +90,20 @@ const logout = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0,
     const result = (0, token_service_1.removeToken)(refreshToken);
     console.log('result', result);
     res.clearCookie("refreshToken");
-    res.status(204).json({ message: "Deleted successfully", result });
+    res.status(200).json({ message: "Deleted successfully", result });
 }));
 // user will be constantly saved between reloads
 const current = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { user } = req;
+    const { token } = user;
     const { refreshToken } = req.cookies;
+    console.log('current cookies', req.cookies);
     const { email, verify, _id: userId, } = user;
     res.cookie("refreshToken", refreshToken, {
         maxAge: 15 * 24 * 60 * 60 * 1000,
     });
     console.log('winner');
-    res.json({
+    res.json({ token,
         user
     });
 }));
