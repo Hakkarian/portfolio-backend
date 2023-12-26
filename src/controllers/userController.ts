@@ -1,6 +1,5 @@
 import { Request, response, Response } from "express";
 import bcryptjs from "bcryptjs";
-import * as jwt from "jsonwebtoken";
 import fs from "fs";
 import { nanoid } from "nanoid";
 const cookie = require('cookie');
@@ -20,6 +19,7 @@ import {
   removeToken,
   saveTokens,
 } from "../service/token-service";
+import { JwtPayload } from "jsonwebtoken";
 
 const baseUrl = process.env.BASE_URL;
 
@@ -56,6 +56,7 @@ const register = catchAsync(async (req: Request, res: Response) => {
 
   res.status(200).json(user);
 });
+
 
 // user must login after registration. If such user is not present, throw an error, save them to database, and add them a token
 const login = catchAsync(async (req: Request, res: Response) => {
@@ -132,6 +133,32 @@ const current = catchAsync(async (req, res: Response) => {
     user
   });
 });
+
+const refresh = catchAsync(async (req: Request, res: Response) => {
+  const { refreshToken } = req.cookies;
+  console.log('0', refreshToken);
+  const userData = validateRefreshToken(refreshToken);
+  console.log('1', userData);
+  if (!userData) {
+    console.log('2')
+    throw ErrorHandler(401);
+  }
+  const user = await User.findById((userData as JwtPayload).id);
+  console.log('3', user);
+  const payload = {
+    id: user?._id,
+    email: user?.email,
+    verify: user?.verify,
+  };
+  const tokens = generateTokens(payload);
+  console.log('4', tokens)
+  const userId = user?._id;
+  saveTokens(userId ?? '', tokens.refreshToken);
+  console.log('5')
+  user!.token = tokens.accessToken;
+  user?.save();
+  res.status(200).json({...tokens, user})
+})
 
 // google authentication. All credentials were passed via the link
 const google = catchAsync(async (req: Request, res: Response) => {
@@ -292,6 +319,7 @@ export default {
   login,
   logout,
   current,
+  refresh,
   google,
   verifyEmail,
   repeatVerifyEmail,

@@ -50,12 +50,13 @@ const validateRefreshToken = (refreshToken) => {
             console.log('refresh is empty');
             throw (0, ErrorHandler_1.default)(401);
         }
+        console.log('snap');
         const vfiedRefresh = jwt.verify(refreshToken, refreshSecret);
         console.log('refresh verified!');
         return vfiedRefresh;
     }
     catch (error) {
-        return null;
+        console.log(error);
     }
 };
 exports.validateRefreshToken = validateRefreshToken;

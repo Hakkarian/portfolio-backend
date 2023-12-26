@@ -107,6 +107,31 @@ const current = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0
         user
     });
 }));
+const refresh = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { refreshToken } = req.cookies;
+    console.log('0', refreshToken);
+    const userData = (0, helpers_1.validateRefreshToken)(refreshToken);
+    console.log('1', userData);
+    if (!userData) {
+        console.log('2');
+        throw (0, helpers_1.ErrorHandler)(401);
+    }
+    const user = yield models_1.User.findById(userData.id);
+    console.log('3', user);
+    const payload = {
+        id: user === null || user === void 0 ? void 0 : user._id,
+        email: user === null || user === void 0 ? void 0 : user.email,
+        verify: user === null || user === void 0 ? void 0 : user.verify,
+    };
+    const tokens = (0, token_service_1.generateTokens)(payload);
+    console.log('4', tokens);
+    const userId = user === null || user === void 0 ? void 0 : user._id;
+    (0, token_service_1.saveTokens)(userId !== null && userId !== void 0 ? userId : '', tokens.refreshToken);
+    console.log('5');
+    user.token = tokens.accessToken;
+    user === null || user === void 0 ? void 0 : user.save();
+    res.status(200).json(Object.assign(Object.assign({}, tokens), { user }));
+}));
 // google authentication. All credentials were passed via the link
 const google = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { _id: userId, email, token, username, avatar, location, birthday, phone, } = req.user;
@@ -229,6 +254,7 @@ exports.default = {
     login,
     logout,
     current,
+    refresh,
     google,
     verifyEmail,
     repeatVerifyEmail,
