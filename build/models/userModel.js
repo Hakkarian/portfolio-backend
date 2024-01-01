@@ -15,6 +15,11 @@ const userSchema = new mongoose_1.default.Schema({
         required: true,
         unique: true,
     },
+    password: {
+        type: String,
+        required: true,
+        unique: true
+    },
     birthday: {
         type: String,
     },
@@ -48,10 +53,6 @@ const userSchema = new mongoose_1.default.Schema({
     },
     verificationToken: {
         type: String,
-    },
-    isAdmin: {
-        type: Boolean,
-        default: false,
     },
 }, { versionKey: false });
 const User = mongoose_1.default.model('User', userSchema, 'users');

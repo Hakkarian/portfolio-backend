@@ -32,33 +32,63 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeToken = exports.saveTokens = exports.generateTokens = void 0;
 const jwt = __importStar(require("jsonwebtoken"));
 const models_1 = require("../models");
-const secret = process.env.JWT_ACCESS_SECRET;
-const secrete = process.env.JWT_REFRESH_SECRET;
-const generateTokens = (payload) => {
-    const accessToken = jwt.sign(payload, secret, { expiresIn: '15s' });
-    const refreshToken = jwt.sign(payload, secrete, { expiresIn: "15d" });
-    return { accessToken, refreshToken };
-};
-exports.generateTokens = generateTokens;
-const saveTokens = (userId, refreshToken) => __awaiter(void 0, void 0, void 0, function* () {
-    const tokenData = yield models_1.Token.findOne({ user: userId });
-    if (tokenData) {
-        console.log('fixed! new key', refreshToken);
-        tokenData.refreshToken = refreshToken;
-        return tokenData.save();
+const accessSecret = process.env.JWT_ACCESS_SECRET;
+const refreshSecret = process.env.JWT_REFRESH_SECRET;
+class TokenService {
+    constructor() {
+        this.validateAccessToken = (accessToken) => {
+            try {
+                const userData = jwt.verify(accessToken, accessSecret);
+                return userData;
+            }
+            catch (error) {
+                return null;
+            }
+        };
+        this.validateRefreshToken = (refreshToken) => {
+            try {
+                console.log('refreshToken validate', refreshToken);
+                const userData = jwt.verify(refreshToken, refreshSecret);
+                console.log('userData validate', userData);
+                return userData;
+            }
+            catch (error) {
+                return null;
+            }
+        };
     }
-    const token = yield models_1.Token.create({ user: userId, refreshToken });
-    console.log('save token', token);
-    return token;
-});
-exports.saveTokens = saveTokens;
-const removeToken = (refreshToken) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log('refreshToken', refreshToken);
-    const tokenData = yield models_1.Token.deleteOne({ refreshToken });
-    console.log('after delete', tokenData);
-    return tokenData;
-});
-exports.removeToken = removeToken;
+    generateTokens(payload) {
+        const accessToken = jwt.sign(payload, accessSecret, { expiresIn: "15s" });
+        const refreshToken = jwt.sign(payload, refreshSecret, { expiresIn: "15d" });
+        return { accessToken, refreshToken };
+    }
+    saveToken(userId, refreshToken) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const tokenData = yield models_1.Token.findOne({ user: userId });
+            if (tokenData) {
+                console.log("fixed! new key", refreshToken);
+                tokenData.refreshToken = refreshToken;
+                return tokenData.save();
+            }
+            const token = yield models_1.Token.create({ user: userId, refreshToken });
+            return token;
+        });
+    }
+    removeToken(refreshToken) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log("logout", refreshToken);
+            const tokenData = yield models_1.Token.deleteOne({ refreshToken });
+            return tokenData;
+        });
+    }
+    findToken(refreshToken) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const tokenData = yield models_1.Token.findOne({ refreshToken });
+            console.log('tokenData', tokenData);
+            return tokenData;
+        });
+    }
+}
+exports.default = new TokenService();

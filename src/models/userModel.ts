@@ -6,6 +6,7 @@ export interface UserType extends Document {
   _id: string,
   username: string;
   email: string;
+  password: string;
   birthday: string;
   location: string;
   phone: string;
@@ -14,7 +15,6 @@ export interface UserType extends Document {
   favorite: Types.ObjectId[];
   verify: boolean;
   verificationToken: string;
-  isAdmin: boolean;
 }
 
 const userSchema = new mongoose.Schema<UserType>(
@@ -27,6 +27,11 @@ const userSchema = new mongoose.Schema<UserType>(
       type: String,
       required: true,
       unique: true,
+    },
+    password: {
+      type: String,
+      required: true,
+      unique: true
     },
     birthday: {
       type: String,
@@ -61,10 +66,6 @@ const userSchema = new mongoose.Schema<UserType>(
     },
     verificationToken: {
       type: String,
-    },
-    isAdmin: {
-      type: Boolean,
-      default: false,
     },
   },
   { versionKey: false }

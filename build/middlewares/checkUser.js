@@ -5,7 +5,7 @@ const schemas_1 = require("../schemas");
 const checkUser = (0, helpers_1.catchAsync)((req, res, next) => {
     const { error, value } = (0, schemas_1.userValidation)(req.body);
     if (error) {
-        throw (0, helpers_1.ErrorHandler)(400, error.message);
+        next((0, helpers_1.ErrorHandler)(400, error.message));
     }
     req.body = value;
     next();

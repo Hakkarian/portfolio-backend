@@ -1,8 +1,9 @@
-import { Request, Response, NextFunction, RequestHandler } from "express";
-import { catchAsync, ErrorHandler, validateRefreshToken } from "../helpers";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import { Request, Response, NextFunction } from "express";
+import { ErrorHandler } from "../helpers";
+import { JwtPayload } from "jsonwebtoken";
 import { User } from "../models";
 import { UserType } from "../models/userModel";
+import { TokenService } from "../service";
 
 // the most important part overall
 
@@ -17,32 +18,27 @@ const authenticate = async (
   res: Response,
   next: NextFunction
 ) => {
-  // check for authorization token
-  const authorization = req.headers.authorization ?? "";
-
-  // split the token into two parts - bearer and token
-  const [bearer, token] = authorization.split(" ");
-  if (bearer !== "Bearer") {
-    next(ErrorHandler(401));
-  }
   try {
-    const { refreshToken } = req.cookies;
-    console.log('ahahahaha', req.cookies)
-    const vfiedRefresh = validateRefreshToken(refreshToken);
-    if (!vfiedRefresh) {
-      console.log("last refresh verification is wrong");
-      throw ErrorHandler(401);
+    const authorizationHeader = req.headers.authorization;
+    if (!authorizationHeader) {
+      return next(ErrorHandler(401, "One error"));
     }
-    // if the token is correct, find user by this id
-    // if user undefined, if user's token isn't there or does not equal to token which is passed - throw an error
-    const user = await User.findById((vfiedRefresh as JwtPayload)?.id);
-    console.log('refresh user contents', user);
-    // else user is passed into the slot, continue
-    req.user = user!;
-    console.log('deus ex machina')
+    const accessToken = req.headers.authorization?.split(' ')[1]!;
+    console.log('auth accessToken', accessToken);
+    if (!accessToken) {
+      return next(ErrorHandler(401, "Two error"));
+    }
+    const userData = TokenService.validateAccessToken(accessToken);
+    console.log('auth userdata', userData);
+    if (!userData) {
+      console.log("last access verification is wrong");
+      throw ErrorHandler(401, "Three error");
+    }
+
+    req.user = userData;
     next();
   } catch (error) {
-    next(ErrorHandler(401));
+    next(ErrorHandler(401, "Some eheherror"));
   }
 };
 

@@ -17,7 +17,7 @@ const crypto_1 = __importDefault(require("crypto"));
 const passport_google_oauth2_1 = require("passport-google-oauth2");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const models_1 = require("../models");
-const token_service_1 = require("../service/token-service");
+const service_1 = require("../service");
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleSecret = process.env.GOOGLE_SECRET;
 const jwtSecret = process.env.JWT_ACCESS_SECRET;
@@ -41,11 +41,11 @@ const googleCallback = (req, accessToken, refreshToken, profile, done) => __awai
         if (user) {
             const { _id: userId } = user;
             console.log('before token');
-            const tokens = (0, token_service_1.generateTokens)({ id: userId });
+            const tokens = service_1.TokenService.generateTokens({ id: userId });
             console.log('after token');
             console.log('access token', tokens.accessToken);
             console.log('refresh token', tokens.refreshToken);
-            (0, token_service_1.saveTokens)(userId, tokens.refreshToken);
+            yield service_1.TokenService.saveToken(userId, tokens.refreshToken);
             user.token = tokens.accessToken;
             user.save();
             return done(null, user);
@@ -70,8 +70,8 @@ const googleCallback = (req, accessToken, refreshToken, profile, done) => __awai
         const { _id: userId } = newUser;
         console.log('2');
         // along with token, which is passed directly to new user
-        const tokens = (0, token_service_1.generateTokens)({ id: userId });
-        (0, token_service_1.saveTokens)(userId, tokens.refreshToken);
+        const tokens = service_1.TokenService.generateTokens({ id: userId });
+        yield service_1.TokenService.saveToken(userId, tokens.refreshToken);
         newUser.token = tokens.accessToken;
         // save him in the database
         newUser.save();

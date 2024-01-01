@@ -5,7 +5,7 @@ import { userValidation } from "../schemas";
 const checkUser = catchAsync((req: Request, res: Response, next: NextFunction) => {
     const { error, value } = userValidation(req.body);
     if (error) {
-        throw ErrorHandler(400, error.message)
+        next(ErrorHandler(400, error.message))
     }
     req.body = value;
     next();

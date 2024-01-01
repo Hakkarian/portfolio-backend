@@ -2,32 +2,58 @@ import * as jwt from "jsonwebtoken";
 import { catchAsync } from "../helpers";
 import { Token } from "../models";
 
-const secret = process.env.JWT_ACCESS_SECRET!;
-const secrete = process.env.JWT_REFRESH_SECRET!;
+const accessSecret = process.env.JWT_ACCESS_SECRET!;
+const refreshSecret = process.env.JWT_REFRESH_SECRET!;
 
-const generateTokens = (payload: any) => {
-    const accessToken = jwt.sign(payload, secret, { expiresIn: '15s' })
-    const refreshToken = jwt.sign(payload, secrete, { expiresIn: "15d" });
-    return {accessToken, refreshToken}
-}
+class TokenService {
+    generateTokens(payload: any) {
+    const accessToken = jwt.sign(payload, accessSecret, { expiresIn: "15s" });
+    const refreshToken = jwt.sign(payload, refreshSecret, { expiresIn: "15d" });
+    return { accessToken, refreshToken };
+  }
 
-const saveTokens = async (userId: string, refreshToken: string) => {
+  async saveToken(userId: string, refreshToken: string) {
     const tokenData = await Token.findOne({ user: userId });
     if (tokenData) {
-        console.log('fixed! new key', refreshToken)
-        tokenData.refreshToken = refreshToken;
-        return tokenData.save();
+      console.log("fixed! new key", refreshToken);
+      tokenData.refreshToken = refreshToken;
+      return tokenData.save();
     }
-    const token = await Token.create({ user: userId, refreshToken })
-    console.log('save token', token)
+    const token = await Token.create({ user: userId, refreshToken });
     return token;
-};
+    }
+    
+  
 
-const removeToken = async (refreshToken: string) => {
-    console.log('refreshToken', refreshToken)
+  async removeToken(refreshToken: string) {
+    console.log("logout", refreshToken);
     const tokenData = await Token.deleteOne({ refreshToken });
-    console.log('after delete', tokenData)
     return tokenData;
+  }
+    async findToken(refreshToken: string) {
+      const tokenData = await Token.findOne({ refreshToken });
+      console.log('tokenData', tokenData);
+        return tokenData;
+    }
+  validateAccessToken = (accessToken: string) => {
+    try {
+      const userData = jwt.verify(accessToken, accessSecret);
+      return userData;
+    } catch (error) {
+      return null;
+    }
+  };
+
+  validateRefreshToken = (refreshToken: string) => {
+    try {
+      console.log('refreshToken validate', refreshToken);
+      const userData = jwt.verify(refreshToken, refreshSecret);
+      console.log('userData validate', userData);
+      return userData;
+    } catch (error) {
+      return null;
+    }
+  };
 }
 
-export {generateTokens, saveTokens, removeToken}
+export default new TokenService();

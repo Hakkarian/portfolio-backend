@@ -9,9 +9,6 @@ import { loginValidation } from "../schemas";
 
 const checkLogin = catchAsync(async (req, res, next) => {
   const { error, value } = loginValidation(req.body);
-  if (error) {
-    throw ErrorHandler(400, error.details[0].message);
-  }
   const user = User.findOne({ email: value.email });
   if (error) {
     next(ErrorHandler(400));

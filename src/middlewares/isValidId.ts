@@ -8,7 +8,7 @@ const isValidId = async (req: Request, res: Response, next: NextFunction) => {
   const { projectId } = req.params;
   const project = Project.findById(projectId);
   if (!project) {
-    throw ErrorHandler(400, "Id is invalid.");
+    next(ErrorHandler(400, "Id is invalid."));
   }
 
   next();

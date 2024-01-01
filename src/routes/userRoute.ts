@@ -14,7 +14,6 @@ router.get(
   googlePassport.authenticate("google", { scope: ["email", "profile"] }),
   userController.google
 );
-router.get("/current", middlewares.authenticate, userController.current);
 router.get("/verify/:verificationToken", userController.verifyEmail);
 router.post("/register", registerLimitter, middlewares.checkRegister, userController.register);
 router.post("/login", loginLimitter, middlewares.checkLogin, userController.login);

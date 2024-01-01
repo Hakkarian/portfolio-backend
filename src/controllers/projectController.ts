@@ -61,7 +61,7 @@ const getLikedProjects = catchAsync(async (req, res) => {
   const pageNumber = Number(page || 1);
   const pageLimit = Number(limit || 1);
 
-  const favorite = await Project.find({ liked: { $in: [id] } })
+  const favorite = await Project.find({ liked: { $in: [id] } }) 
     .skip((pageNumber - 1) * pageLimit)
     .limit(pageLimit);
 

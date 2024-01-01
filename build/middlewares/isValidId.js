@@ -17,7 +17,7 @@ const isValidId = (req, res, next) => __awaiter(void 0, void 0, void 0, function
     const { projectId } = req.params;
     const project = models_1.Project.findById(projectId);
     if (!project) {
-        throw (0, helpers_1.ErrorHandler)(400, "Id is invalid.");
+        next((0, helpers_1.ErrorHandler)(400, "Id is invalid."));
     }
     next();
 });

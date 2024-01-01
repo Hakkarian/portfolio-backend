@@ -1,163 +1,66 @@
-import { Request, response, Response } from "express";
-import bcryptjs from "bcryptjs";
+import { Request, Response } from "express";
 import fs from "fs";
 import { nanoid } from "nanoid";
-const cookie = require('cookie');
 
 import {
   catchAsync,
   ErrorHandler,
-  sendNodeEmail,
-  userAvatar,
-  validateRefreshToken,
+  sendNodeEmail
 } from "../helpers";
 import { Comment, User } from "../models";
 import { UserType } from "../models/userModel";
 import cloudinary from "../helpers/cloudy";
-import {
-  generateTokens,
-  removeToken,
-  saveTokens,
-} from "../service/token-service";
-import { JwtPayload } from "jsonwebtoken";
+import { TokenService, UserService } from "../service";
+
 
 const baseUrl = process.env.BASE_URL;
 
+
 // create a user with default avatar and credentials
 const register = catchAsync(async (req: Request, res: Response) => {
-  const { email } = req.body;
+  const { username, email, password } = req.body;
+  console.log('1')
   // hashed password
   const salt = 10;
-  const hashedPassword = await bcryptjs.hash(req.body.password, salt);
-
-  const avatar = userAvatar(email);
-
-  const verificationToken = nanoid();
-
   // Create a new user
-  const user = await User.create({
-    username: req.body.username,
-    email: req.body.email,
-    birthday: "",
-    location: "",
-    phone: "",
-    avatar: { url: avatar, id: "" },
-    password: hashedPassword,
-  });
-
-  // verify email upon creation
-  const verifyEmail = {
-    to: req.body.email,
-    subject: "Verify email",
-    html: `<a target="_blank" href="${baseUrl}/users/verify/${user.verificationToken}">Click me to verify email</a>`,
-  };
-
-  await sendNodeEmail(verifyEmail);
-
-  res.status(200).json(user);
+  const userData = await UserService.registration(username, email, password, salt);
+  console.log('2')
+  res.cookie('refreshToken', userData.refreshToken, { httpOnly: true, maxAge: 15 * 24 * 60 * 60 * 1000 });
+  res.status(200).json(userData);
 });
-
 
 // user must login after registration. If such user is not present, throw an error, save them to database, and add them a token
 const login = catchAsync(async (req: Request, res: Response) => {
-  const user = await User.findOne({ email: req.body.email });
-  const cookieHeader = res.get('Set-Cookie');
-  console.log('set-cookie header')
-  console.log("login", user);
-  if (!user) {
-    return res.status(404).json({ message: "Not Found" });
-  }
-  const payload = {
-    id: user?._id,
-    email: user?.email,
-    verify: user?.verify,
-  };
-  const tokens = generateTokens(payload);
-  console.log('user id', payload.id);
-  res.cookie("refreshToken", tokens.refreshToken, {
-    maxAge: 15 * 24 * 60 * 60 * 1000,
+  console.log('login')
+  const { email, password } = req.body;
+  console.log('email')
+  const userData = await UserService.login(email, password);
+  console.log('yea', userData)
+  res.cookie("refreshToken", userData.refreshToken, {
     httpOnly: true,
+    maxAge: 15 * 24 * 60 * 60 * 1000,
   });
-  await saveTokens(payload.id, tokens.refreshToken);
-
-  console.log("access token", tokens.accessToken);
-
-  user.token = tokens.accessToken;
-
-  user.save();
-
-  res.status(200).json({
-    ...tokens,
-    user: {
-      username: user.username,
-      email: user.email,
-      location: user.location,
-      birthday: user.birthday,
-      phone: user.phone,
-      userId: user._id,
-      favorite: user.favorite,
-      isAdmin: user.isAdmin,
-      avatar: user.avatar,
-    },
-  });
+  res.status(200).json(userData);
 });
-
 // on logout user's token is removed from database.
 const logout = catchAsync(async (req, res: Response) => {
   const { refreshToken } = req.cookies;
-  const result = removeToken(refreshToken);
-  console.log('result', result);
+  const token = UserService.logout(refreshToken);
+  console.log('clear 2')
   res.clearCookie("refreshToken");
-  res.status(200).json({ message: "Deleted successfully", result});
+  console.log('clear 3')
+  res.status(200).json({ message: "Deleted successfully", token});
 });
 
 // user will be constantly saved between reloads
-const current = catchAsync(async (req, res: Response) => {
-  const { user } = req;
-  const { token } = user as UserType;
-  const { refreshToken } = req.cookies;
-  console.log('current cookies', req.cookies);
-  const {
-    email,
-    verify,
-    _id: userId,
-  } = user as UserType;
 
-
-
-  res.cookie("refreshToken", refreshToken, {
-    maxAge: 15 * 24 * 60 * 60 * 1000,
-  });
-  console.log('winner')
-  res.json({token,
-    user
-  });
-});
 
 const refresh = catchAsync(async (req: Request, res: Response) => {
   const { refreshToken } = req.cookies;
-  console.log('0', refreshToken);
-  const userData = validateRefreshToken(refreshToken);
-  console.log('1', userData);
-  if (!userData) {
-    console.log('2')
-    throw ErrorHandler(401);
-  }
-  const user = await User.findById((userData as JwtPayload).id);
-  console.log('3', user);
-  const payload = {
-    id: user?._id,
-    email: user?.email,
-    verify: user?.verify,
-  };
-  const tokens = generateTokens(payload);
-  console.log('4', tokens)
-  const userId = user?._id;
-  saveTokens(userId ?? '', tokens.refreshToken);
-  console.log('5')
-  user!.token = tokens.accessToken;
-  user?.save();
-  res.status(200).json({...tokens, user})
+  const userData = await UserService.refresh(refreshToken);
+  console.log('refresh data', userData)
+  console.log('auth header', req.headers.authorization)
+  res.status(200).json(userData)
 })
 
 // google authentication. All credentials were passed via the link
@@ -252,7 +155,6 @@ const updateInfo = catchAsync(async (req, res) => {
       phone: user?.phone,
       userId: user?._id,
       favorite: user?.favorite,
-      isAdmin: user?.isAdmin,
       avatar: user?.avatar,
     });
   } else {
@@ -308,7 +210,6 @@ const updateInfo = catchAsync(async (req, res) => {
       phone: user?.phone,
       userId: user?._id,
       favorite: user?.favorite,
-      isAdmin: user?.isAdmin,
       avatar: user?.avatar,
     });
   }
@@ -318,7 +219,6 @@ export default {
   register,
   login,
   logout,
-  current,
   refresh,
   google,
   verifyEmail,

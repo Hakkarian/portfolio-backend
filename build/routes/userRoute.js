@@ -12,7 +12,6 @@ const multerPhoto_1 = require("../helpers/multerPhoto");
 const router = express_1.default.Router();
 // paths for authentication
 router.get("/google/callback", googlePassport_1.default.authenticate("google", { scope: ["email", "profile"] }), userController_1.default.google);
-router.get("/current", middlewares_1.default.authenticate, userController_1.default.current);
 router.get("/verify/:verificationToken", userController_1.default.verifyEmail);
 router.post("/register", helpers_1.registerLimitter, middlewares_1.default.checkRegister, userController_1.default.register);
 router.post("/login", helpers_1.loginLimitter, middlewares_1.default.checkLogin, userController_1.default.login);

@@ -7,7 +7,7 @@ import bcryptjs from 'bcryptjs';
 
 
 import { User } from '../models';
-import { generateTokens, saveTokens } from '../service/token-service';
+import { TokenService } from '../service';
 
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleSecret = process.env.GOOGLE_SECRET;
@@ -36,11 +36,11 @@ const googleCallback = async (req: Request, accessToken: string, refreshToken: s
     if (user) {
       const { _id: userId } = user;
       console.log('before token')
-      const tokens = generateTokens({ id: userId });
+      const tokens = TokenService.generateTokens({ id: userId });
       console.log('after token')
       console.log('access token', tokens.accessToken);
       console.log('refresh token', tokens.refreshToken);
-      saveTokens(userId, tokens.refreshToken);
+      await TokenService.saveToken(userId, tokens.refreshToken);
       user.token = tokens.accessToken;
       user.save();
       return done(null, user);
@@ -68,8 +68,8 @@ const googleCallback = async (req: Request, accessToken: string, refreshToken: s
     const { _id: userId } = newUser;
     console.log('2')
     // along with token, which is passed directly to new user
-    const tokens = generateTokens({ id: userId })
-    saveTokens(userId, tokens.refreshToken)
+    const tokens = TokenService.generateTokens({ id: userId })
+    await TokenService.saveToken(userId, tokens.refreshToken)
     newUser.token = tokens.accessToken;
     // save him in the database
     newUser.save();
