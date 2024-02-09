@@ -18,7 +18,6 @@ const helpers_1 = require("../helpers");
 const models_1 = require("../models");
 const cloudy_1 = __importDefault(require("../helpers/cloudy"));
 const service_1 = require("../service");
-const baseUrl = process.env.BASE_URL;
 // create a user with default avatar and credentials
 const register = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log('0');
