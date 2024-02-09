@@ -12,9 +12,6 @@ import { UserType } from "../models/userModel";
 import cloudinary from "../helpers/cloudy";
 import { UserService } from "../service";
 
-
-const baseUrl = process.env.BASE_URL;
-
 // create a user with default avatar and credentials
 const register = catchAsync(async (req: Request, res: Response) => {
   console.log('0')
