@@ -7,7 +7,7 @@ const refreshSecret = process.env.JWT_REFRESH_SECRET!;
 
 class TokenService {
     generateTokens(payload: any) {
-    const accessToken = jwt.sign(payload, accessSecret, { expiresIn: "15s" });
+      const accessToken = jwt.sign(payload, accessSecret, { expiresIn: "1m" });
     const refreshToken = jwt.sign(payload, refreshSecret, { expiresIn: "15d" });
     return { accessToken, refreshToken };
   }
@@ -37,9 +37,12 @@ class TokenService {
     }
   validateAccessToken = (accessToken: string) => {
     try {
+      console.log('access accessible', accessToken)
       const userData = jwt.verify(accessToken, accessSecret);
+      console.log('01010101')
+      console.log('access userDate', userData)
       return userData;
-    } catch (error) {
+    } catch (error: any) {
       return null;
     }
   };

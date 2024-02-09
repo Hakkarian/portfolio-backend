@@ -12,33 +12,33 @@ export interface AuthenticatedRequest extends Request {
   user?: UserType;
   token?: string;
 }
-
 const authenticate = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
+
   try {
-    const authorizationHeader = req.headers.authorization;
+    const authorizationHeader = req.headers.authorization as string;
     if (!authorizationHeader) {
       return next(ErrorHandler(401, "One error"));
     }
-    const accessToken = req.headers.authorization?.split(' ')[1]!;
+    const accessToken = authorizationHeader.split(' ')[1]!;
     console.log('auth accessToken', accessToken);
+    console.log('accessT', accessToken);
     if (!accessToken) {
-      return next(ErrorHandler(401, "Two error"));
+      return next(ErrorHandler(404, "Two error"));
     }
     const userData = TokenService.validateAccessToken(accessToken);
     console.log('auth userdata', userData);
     if (!userData) {
       console.log("last access verification is wrong");
-      throw ErrorHandler(401, "Three error");
+      return next(ErrorHandler(401, "Token expired"));
     }
-
     req.user = userData;
     next();
   } catch (error) {
-    next(ErrorHandler(401, "Some eheherror"));
+    next(error)
   }
 };
 

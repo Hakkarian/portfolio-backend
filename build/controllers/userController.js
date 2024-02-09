@@ -21,13 +21,15 @@ const service_1 = require("../service");
 const baseUrl = process.env.BASE_URL;
 // create a user with default avatar and credentials
 const register = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log('0');
     const { username, email, password } = req.body;
     console.log('1');
     // hashed password
     const salt = 10;
     // Create a new user
-    const userData = yield service_1.UserService.registration(username, email, password, salt);
     console.log('2');
+    const userData = yield service_1.UserService.registration(username, email, password, salt);
+    console.log('3');
     res.cookie('refreshToken', userData.refreshToken, { httpOnly: true, maxAge: 15 * 24 * 60 * 60 * 1000 });
     res.status(200).json(userData);
 }));
@@ -48,17 +50,15 @@ const login = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, 
 const logout = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { refreshToken } = req.cookies;
     const token = service_1.UserService.logout(refreshToken);
-    console.log('clear 2');
     res.clearCookie("refreshToken");
-    console.log('clear 3');
     res.status(200).json({ message: "Deleted successfully", token });
 }));
 // user will be constantly saved between reloads
 const refresh = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log('do you see me?');
     const { refreshToken } = req.cookies;
     const userData = yield service_1.UserService.refresh(refreshToken);
     console.log('refresh data', userData);
-    console.log('auth header', req.headers.authorization);
     res.status(200).json(userData);
 }));
 // google authentication. All credentials were passed via the link

@@ -10,25 +10,25 @@ import {
 import { Comment, User } from "../models";
 import { UserType } from "../models/userModel";
 import cloudinary from "../helpers/cloudy";
-import { TokenService, UserService } from "../service";
+import { UserService } from "../service";
 
 
 const baseUrl = process.env.BASE_URL;
 
-
 // create a user with default avatar and credentials
 const register = catchAsync(async (req: Request, res: Response) => {
+  console.log('0')
   const { username, email, password } = req.body;
   console.log('1')
   // hashed password
   const salt = 10;
   // Create a new user
-  const userData = await UserService.registration(username, email, password, salt);
   console.log('2')
+  const userData = await UserService.registration(username, email, password, salt);
+  console.log('3')
   res.cookie('refreshToken', userData.refreshToken, { httpOnly: true, maxAge: 15 * 24 * 60 * 60 * 1000 });
   res.status(200).json(userData);
 });
-
 // user must login after registration. If such user is not present, throw an error, save them to database, and add them a token
 const login = catchAsync(async (req: Request, res: Response) => {
   console.log('login')
@@ -44,22 +44,24 @@ const login = catchAsync(async (req: Request, res: Response) => {
 });
 // on logout user's token is removed from database.
 const logout = catchAsync(async (req, res: Response) => {
+
   const { refreshToken } = req.cookies;
   const token = UserService.logout(refreshToken);
-  console.log('clear 2')
+
   res.clearCookie("refreshToken");
-  console.log('clear 3')
+
   res.status(200).json({ message: "Deleted successfully", token});
 });
 
 // user will be constantly saved between reloads
 
 
+
 const refresh = catchAsync(async (req: Request, res: Response) => {
+  console.log('do you see me?')
   const { refreshToken } = req.cookies;
   const userData = await UserService.refresh(refreshToken);
   console.log('refresh data', userData)
-  console.log('auth header', req.headers.authorization)
   res.status(200).json(userData)
 })
 

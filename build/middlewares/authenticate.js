@@ -12,28 +12,28 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const helpers_1 = require("../helpers");
 const service_1 = require("../service");
 const authenticate = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
     try {
         const authorizationHeader = req.headers.authorization;
         if (!authorizationHeader) {
             return next((0, helpers_1.ErrorHandler)(401, "One error"));
         }
-        const accessToken = (_a = req.headers.authorization) === null || _a === void 0 ? void 0 : _a.split(' ')[1];
+        const accessToken = authorizationHeader.split(' ')[1];
         console.log('auth accessToken', accessToken);
+        console.log('accessT', accessToken);
         if (!accessToken) {
-            return next((0, helpers_1.ErrorHandler)(401, "Two error"));
+            return next((0, helpers_1.ErrorHandler)(404, "Two error"));
         }
         const userData = service_1.TokenService.validateAccessToken(accessToken);
         console.log('auth userdata', userData);
         if (!userData) {
             console.log("last access verification is wrong");
-            throw (0, helpers_1.ErrorHandler)(401, "Three error");
+            return next((0, helpers_1.ErrorHandler)(401, "Token expired"));
         }
         req.user = userData;
         next();
     }
     catch (error) {
-        next((0, helpers_1.ErrorHandler)(401, "Some eheherror"));
+        next(error);
     }
 });
 exports.default = authenticate;

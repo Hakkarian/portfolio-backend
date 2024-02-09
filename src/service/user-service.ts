@@ -44,6 +44,7 @@ class UserService {
         if (!user) {
             throw ErrorHandler(401, "User does not exist")
         }
+
         const isPassEquals = await bcrypt.compare(password, user.password);
         if (!isPassEquals) {
             throw ErrorHandler(401, "Password is wrong")
@@ -81,9 +82,14 @@ class UserService {
             throw ErrorHandler(401);
         }
         const user = await User.findById((userData as JwtPayload).id);
-        console.log('refresh user', user)
-        const tokens = TokenService.generateTokens({ ...user });
-        console.log('6')
+        console.log('refresh user', user);
+        const payload = {
+          id: user?._id as string,
+          email: user?.email,
+          verify: user?.verify,
+        };
+        const tokens = TokenService.generateTokens(payload);
+        console.log('userController refresh tokens', tokens);
         return { ...tokens, user };
     }
 }

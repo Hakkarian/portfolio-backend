@@ -22,7 +22,7 @@ const port = process.env.PORT || 5000;
 const mongoUrl: string = process.env.MONGO_URL || '';
 
 // enables requests from different origins to access home API
-app.use(cors({ origin: "http://localhost:3000", credentials: true, exposedHeaders: 'Authorization' }));
+app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 
 // parses incoming requests with JSON uploads
 app.use(express.json());

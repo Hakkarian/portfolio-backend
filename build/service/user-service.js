@@ -97,8 +97,13 @@ class UserService {
             }
             const user = yield models_1.User.findById(userData.id);
             console.log('refresh user', user);
-            const tokens = _1.TokenService.generateTokens(Object.assign({}, user));
-            console.log('6');
+            const payload = {
+                id: user === null || user === void 0 ? void 0 : user._id,
+                email: user === null || user === void 0 ? void 0 : user.email,
+                verify: user === null || user === void 0 ? void 0 : user.verify,
+            };
+            const tokens = _1.TokenService.generateTokens(payload);
+            console.log('userController refresh tokens', tokens);
             return Object.assign(Object.assign({}, tokens), { user });
         });
     }

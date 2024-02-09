@@ -40,7 +40,10 @@ class TokenService {
     constructor() {
         this.validateAccessToken = (accessToken) => {
             try {
+                console.log('access accessible', accessToken);
                 const userData = jwt.verify(accessToken, accessSecret);
+                console.log('01010101');
+                console.log('access userDate', userData);
                 return userData;
             }
             catch (error) {
@@ -60,7 +63,7 @@ class TokenService {
         };
     }
     generateTokens(payload) {
-        const accessToken = jwt.sign(payload, accessSecret, { expiresIn: "15s" });
+        const accessToken = jwt.sign(payload, accessSecret, { expiresIn: "1m" });
         const refreshToken = jwt.sign(payload, refreshSecret, { expiresIn: "15d" });
         return { accessToken, refreshToken };
     }
