@@ -7,7 +7,7 @@
     "start": "cross-env NODE_ENV=production node build/app.js",
     "dev": "cross-env NODE_ENV=development nodemon build/app.js",
     "build": "tsc -w",
-    "cdev": "concurrently \"npm run build\" \"npm run dev\""
+    "cdev": "concurrently \"npm run build\" \"npm run start\""
   },
   "repository": {
     "type": "git",
