@@ -24,7 +24,7 @@ const clientUrl = process.env.CLIENT_URL;
 
 // enables requests from different origins to access home API
 app.use(
-  cors({ origin: clientUrl, credentials: true })
+  cors({ origin: "https://porfolio-frontend.vercel.app", credentials: true })
 );
 
 // parses incoming requests with JSON uploads
