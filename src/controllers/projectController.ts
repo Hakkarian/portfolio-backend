@@ -31,13 +31,11 @@ const getPaginatedProjects = catchAsync(async (req, res) => {
   // *page starts for first page, limit is to determine how many elements are possible per one page
   const { page, limit } = req.query;
 
-  console.log('1')
   // if page is undefined, start from first
   const pageNumber = Number(page) || 1;
   // if limit is undefined, then only 1 element per page is our limitation
   const pageLimit = Number(limit) || 1;
 
-  console.log('2')
   // find all projects. then skip pages lesser than current page. For instance, if we have 5 pages with 50 elements each
   // and we want to go to the "4" page, then SKIP 3 pages and 150 elements overall.
   // after skipping, restrict chosen page to have no more than fixed number of elements
@@ -45,8 +43,6 @@ const getPaginatedProjects = catchAsync(async (req, res) => {
     .skip((pageNumber - 1) * pageLimit)
     .limit(pageLimit);
   const totalProjects = await Project.find().count();
-
-  console.log('3')
 
   // display in .json format
   res.status(200).json({
@@ -73,8 +69,6 @@ const getLikedProjects = catchAsync(async (req, res) => {
   const totalLikedProjects = await Project.find({
     liked: { $in: [id] },
   }).count();
-
-  console.log("liked", totalLikedProjects);
 
   res.status(200).json({
     favorite,
@@ -193,13 +187,11 @@ const projectLike = catchAsync(async (req, res) => {
   const { page, limit } = req.query;
   const { likes, liked } = req.body;
   const { id } = req.user as UserType;
-  console.log('proj 0 user', id)
   const likedUser = liked.find((item: string) => item === id);
 
   const pageNumber = Number(page || 1);
   const pageLimit = Number(limit || 1);
 
-  console.log('proj 1')
   if (likedUser) {
     const filtered = liked.filter((item: string) => item !== id);
     await Project.findByIdAndUpdate(
@@ -212,7 +204,6 @@ const projectLike = catchAsync(async (req, res) => {
       .limit(pageLimit);
     return res.status(200).json(projects);
   }
-  console.log("proj 2");
   await Project.findByIdAndUpdate(projectId, {
     $push: { liked: id },
     likes,
@@ -220,7 +211,6 @@ const projectLike = catchAsync(async (req, res) => {
   const projects = await Project.find()
     .skip((pageNumber - 1) * pageLimit)
     .limit(pageLimit);
-  console.log("proj 3", id);
   res.status(200).json(projects);
 });
 const projectDislike = catchAsync(async (req, res) => {

@@ -20,25 +20,19 @@ const cloudy_1 = __importDefault(require("../helpers/cloudy"));
 const service_1 = require("../service");
 // create a user with default avatar and credentials
 const register = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log('0');
     const { username, email, password } = req.body;
-    console.log('1');
     // hashed password
     const salt = 10;
     // Create a new user
-    console.log('2');
     const userData = yield service_1.UserService.registration(username, email, password, salt);
-    console.log('3');
     res.cookie('refreshToken', userData.refreshToken, { httpOnly: true, maxAge: 15 * 24 * 60 * 60 * 1000 });
     res.status(200).json(userData);
 }));
 // user must login after registration. If such user is not present, throw an error, save them to database, and add them a token
 const login = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log('login');
     const { email, password } = req.body;
-    console.log('email');
     const userData = yield service_1.UserService.login(email, password);
-    console.log('yea', userData);
+    console.log('data for comment', userData);
     res.cookie("refreshToken", userData.refreshToken, {
         httpOnly: true,
         maxAge: 15 * 24 * 60 * 60 * 1000,
@@ -54,10 +48,8 @@ const logout = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0,
 }));
 // user will be constantly saved between reloads
 const refresh = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log('do you see me?');
     const { refreshToken } = req.cookies;
     const userData = yield service_1.UserService.refresh(refreshToken);
-    console.log('refresh data', userData);
     res.status(200).json(userData);
 }));
 // google authentication. All credentials were passed via the link
@@ -116,16 +108,7 @@ const updateInfo = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, voi
             "author.email": email,
             "author.phone": phone,
         }, { new: true });
-        return res.status(200).json({
-            username: user === null || user === void 0 ? void 0 : user.username,
-            email: user === null || user === void 0 ? void 0 : user.email,
-            location: user === null || user === void 0 ? void 0 : user.location,
-            birthday: user === null || user === void 0 ? void 0 : user.birthday,
-            phone: user === null || user === void 0 ? void 0 : user.phone,
-            userId: user === null || user === void 0 ? void 0 : user._id,
-            favorite: user === null || user === void 0 ? void 0 : user.favorite,
-            avatar: user === null || user === void 0 ? void 0 : user.avatar,
-        });
+        return res.status(200).json(user);
     }
     else {
         const userOld = yield models_1.User.findById(userId);
@@ -143,7 +126,6 @@ const updateInfo = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, voi
             crop: "fill",
             gravity: "auto",
         });
-        console.log(req.file.path);
         fs_1.default.unlink(req.file.path, (error) => console.log(error));
         const avatar = { url: result.secure_url, id: result.public_id };
         const user = yield models_1.User.findByIdAndUpdate(userId, {
@@ -163,16 +145,7 @@ const updateInfo = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, voi
             "author.avatar.url": result.secure_url,
             "author.avatar.id": result.public_id,
         }, { new: true });
-        return res.status(200).json({
-            username: user === null || user === void 0 ? void 0 : user.username,
-            email: user === null || user === void 0 ? void 0 : user.email,
-            location: user === null || user === void 0 ? void 0 : user.location,
-            birthday: user === null || user === void 0 ? void 0 : user.birthday,
-            phone: user === null || user === void 0 ? void 0 : user.phone,
-            userId: user === null || user === void 0 ? void 0 : user._id,
-            favorite: user === null || user === void 0 ? void 0 : user.favorite,
-            avatar: user === null || user === void 0 ? void 0 : user.avatar,
-        });
+        return res.status(200).json(user);
     }
 }));
 exports.default = {

@@ -14,25 +14,19 @@ import { UserService } from "../service";
 
 // create a user with default avatar and credentials
 const register = catchAsync(async (req: Request, res: Response) => {
-  console.log('0')
   const { username, email, password } = req.body;
-  console.log('1')
   // hashed password
   const salt = 10;
   // Create a new user
-  console.log('2')
   const userData = await UserService.registration(username, email, password, salt);
-  console.log('3')
   res.cookie('refreshToken', userData.refreshToken, { httpOnly: true, maxAge: 15 * 24 * 60 * 60 * 1000 });
   res.status(200).json(userData);
 });
 // user must login after registration. If such user is not present, throw an error, save them to database, and add them a token
 const login = catchAsync(async (req: Request, res: Response) => {
-  console.log('login')
   const { email, password } = req.body;
-  console.log('email')
   const userData = await UserService.login(email, password);
-  console.log('yea', userData)
+  console.log('data for comment', userData);
   res.cookie("refreshToken", userData.refreshToken, {
     httpOnly: true,
     maxAge: 15 * 24 * 60 * 60 * 1000,
@@ -55,10 +49,8 @@ const logout = catchAsync(async (req, res: Response) => {
 
 
 const refresh = catchAsync(async (req: Request, res: Response) => {
-  console.log('do you see me?')
   const { refreshToken } = req.cookies;
   const userData = await UserService.refresh(refreshToken);
-  console.log('refresh data', userData)
   res.status(200).json(userData)
 })
 
@@ -146,16 +138,7 @@ const updateInfo = catchAsync(async (req, res) => {
       },
       { new: true }
     );
-    return res.status(200).json({
-      username: user?.username,
-      email: user?.email,
-      location: user?.location,
-      birthday: user?.birthday,
-      phone: user?.phone,
-      userId: user?._id,
-      favorite: user?.favorite,
-      avatar: user?.avatar,
-    });
+    return res.status(200).json(user);
   } else {
     const userOld = await User.findById(userId);
     if (!userOld) {
@@ -172,7 +155,6 @@ const updateInfo = catchAsync(async (req, res) => {
       crop: "fill",
       gravity: "auto",
     });
-    console.log(req.file.path);
     fs.unlink(req.file.path, (error) => console.log(error));
 
     const avatar = { url: result.secure_url, id: result.public_id };
@@ -201,16 +183,7 @@ const updateInfo = catchAsync(async (req, res) => {
       },
       { new: true }
     );
-    return res.status(200).json({
-      username: user?.username,
-      email: user?.email,
-      location: user?.location,
-      birthday: user?.birthday,
-      phone: user?.phone,
-      userId: user?._id,
-      favorite: user?.favorite,
-      avatar: user?.avatar,
-    });
+    return res.status(200).json(user);
   }
 });
 

@@ -40,10 +40,7 @@ class TokenService {
     constructor() {
         this.validateAccessToken = (accessToken) => {
             try {
-                console.log('access accessible', accessToken);
                 const userData = jwt.verify(accessToken, accessSecret);
-                console.log('01010101');
-                console.log('access userDate', userData);
                 return userData;
             }
             catch (error) {
@@ -52,9 +49,7 @@ class TokenService {
         };
         this.validateRefreshToken = (refreshToken) => {
             try {
-                console.log('refreshToken validate', refreshToken);
                 const userData = jwt.verify(refreshToken, refreshSecret);
-                console.log('userData validate', userData);
                 return userData;
             }
             catch (error) {
@@ -71,7 +66,6 @@ class TokenService {
         return __awaiter(this, void 0, void 0, function* () {
             const tokenData = yield models_1.Token.findOne({ user: userId });
             if (tokenData) {
-                console.log("fixed! new key", refreshToken);
                 tokenData.refreshToken = refreshToken;
                 return tokenData.save();
             }
@@ -81,7 +75,6 @@ class TokenService {
     }
     removeToken(refreshToken) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log("logout", refreshToken);
             const tokenData = yield models_1.Token.deleteOne({ refreshToken });
             return tokenData;
         });
@@ -89,7 +82,6 @@ class TokenService {
     findToken(refreshToken) {
         return __awaiter(this, void 0, void 0, function* () {
             const tokenData = yield models_1.Token.findOne({ refreshToken });
-            console.log('tokenData', tokenData);
             return tokenData;
         });
     }

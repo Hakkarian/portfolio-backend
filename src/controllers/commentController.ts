@@ -23,6 +23,7 @@ const addComment = async (req: Request, res: Response) => {
   const { projectId } = req.params;
   const { _id, username, email, location, phone, avatar } =
     req.user as UserType;
+  console.log('user credentials', req.user); 
   const userId = _id;
   const { content } = req.body;
   const comment = await Comment.create({

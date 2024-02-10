@@ -18,15 +18,11 @@ const authenticate = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
             return next((0, helpers_1.ErrorHandler)(401, "One error"));
         }
         const accessToken = authorizationHeader.split(' ')[1];
-        console.log('auth accessToken', accessToken);
-        console.log('accessT', accessToken);
         if (!accessToken) {
             return next((0, helpers_1.ErrorHandler)(404, "Two error"));
         }
         const userData = service_1.TokenService.validateAccessToken(accessToken);
-        console.log('auth userdata', userData);
         if (!userData) {
-            console.log("last access verification is wrong");
             return next((0, helpers_1.ErrorHandler)(401, "Token expired"));
         }
         req.user = userData;

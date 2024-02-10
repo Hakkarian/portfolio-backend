@@ -30,12 +30,10 @@ const getAllProjects = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0,
 const getPaginatedProjects = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // *page starts for first page, limit is to determine how many elements are possible per one page
     const { page, limit } = req.query;
-    console.log('1');
     // if page is undefined, start from first
     const pageNumber = Number(page) || 1;
     // if limit is undefined, then only 1 element per page is our limitation
     const pageLimit = Number(limit) || 1;
-    console.log('2');
     // find all projects. then skip pages lesser than current page. For instance, if we have 5 pages with 50 elements each
     // and we want to go to the "4" page, then SKIP 3 pages and 150 elements overall.
     // after skipping, restrict chosen page to have no more than fixed number of elements
@@ -43,7 +41,6 @@ const getPaginatedProjects = (0, helpers_1.catchAsync)((req, res) => __awaiter(v
         .skip((pageNumber - 1) * pageLimit)
         .limit(pageLimit);
     const totalProjects = yield models_1.Project.find().count();
-    console.log('3');
     // display in .json format
     res.status(200).json({
         projects,
@@ -66,7 +63,6 @@ const getLikedProjects = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 
     const totalLikedProjects = yield models_1.Project.find({
         liked: { $in: [id] },
     }).count();
-    console.log("liked", totalLikedProjects);
     res.status(200).json({
         favorite,
         currentLikedPage: pageNumber,
@@ -169,11 +165,9 @@ const projectLike = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, vo
     const { page, limit } = req.query;
     const { likes, liked } = req.body;
     const { id } = req.user;
-    console.log('proj 0 user', id);
     const likedUser = liked.find((item) => item === id);
     const pageNumber = Number(page || 1);
     const pageLimit = Number(limit || 1);
-    console.log('proj 1');
     if (likedUser) {
         const filtered = liked.filter((item) => item !== id);
         yield models_1.Project.findByIdAndUpdate(projectId, { liked: filtered, likes }, { new: true });
@@ -182,7 +176,6 @@ const projectLike = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, vo
             .limit(pageLimit);
         return res.status(200).json(projects);
     }
-    console.log("proj 2");
     yield models_1.Project.findByIdAndUpdate(projectId, {
         $push: { liked: id },
         likes,
@@ -190,7 +183,6 @@ const projectLike = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, vo
     const projects = yield models_1.Project.find()
         .skip((pageNumber - 1) * pageLimit)
         .limit(pageLimit);
-    console.log("proj 3", id);
     res.status(200).json(projects);
 }));
 const projectDislike = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {

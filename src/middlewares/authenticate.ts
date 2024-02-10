@@ -24,15 +24,11 @@ const authenticate = async (
       return next(ErrorHandler(401, "One error"));
     }
     const accessToken = authorizationHeader.split(' ')[1]!;
-    console.log('auth accessToken', accessToken);
-    console.log('accessT', accessToken);
     if (!accessToken) {
       return next(ErrorHandler(404, "Two error"));
     }
     const userData = TokenService.validateAccessToken(accessToken);
-    console.log('auth userdata', userData);
     if (!userData) {
-      console.log("last access verification is wrong");
       return next(ErrorHandler(401, "Token expired"));
     }
     req.user = userData;

@@ -26,6 +26,7 @@ const getAllComments = (0, helpers_1.catchAsync)((req, res) => __awaiter(void 0,
 const addComment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { projectId } = req.params;
     const { _id, username, email, location, phone, avatar } = req.user;
+    console.log('user credentials', req.user);
     const userId = _id;
     const { content } = req.body;
     const comment = yield models_1.Comment.create({
