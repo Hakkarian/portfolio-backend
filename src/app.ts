@@ -20,7 +20,7 @@ app.use(cookieParser());
 // determine that port will equal to placeholder value, alogn with mongo key
 const port = process.env.PORT || 5000;
 const mongoUrl: string = process.env.MONGO_URL || '';
-const clientUrl: string = process.env.CLIENT_URL || '';
+const clientUrl = process.env.CLIENT_URL;
 
 // enables requests from different origins to access home API
 app.use(
