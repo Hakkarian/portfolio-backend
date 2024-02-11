@@ -23,7 +23,9 @@ const mongoUrl: string = process.env.MONGO_URL || '';
 const clientUrl = process.env.CLIENT_URL;
 
 // enables requests from different origins to access home API
-app.use(cors({ origin: clientUrl, credentials: true }));
+app.use(
+  cors({ origin: "https://porfolio-frontend.vercel.app", methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"], credentials: true })
+);
 
 // parses incoming requests with JSON uploads
 app.use(express.json());
