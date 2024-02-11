@@ -22,8 +22,6 @@ const port = process.env.PORT || 5000;
 const mongoUrl: string = process.env.MONGO_URL || '';
 const clientUrl = process.env.CLIENT_URL;
 
-app.use(cors({ origin: clientUrl, credentials: true }));
-
 // enables requests from different origins to access home API
 app.use(cors({ origin: clientUrl, credentials: true }));
 
